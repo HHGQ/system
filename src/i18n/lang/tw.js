@@ -1,0 +1,1 @@
+var lang={"这是什么":""};module.exports=lang
