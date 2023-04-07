@@ -44,6 +44,8 @@ export default {
         { name: 'React', url: 'https://react.docschina.org/', logo: 'react' },
         { name: '微信小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', logo: 'wxxcx' },
         { name: '阿里巴巴图标库', url: 'https://www.iconfont.cn/collections/index?spm=a313x.7781069.1998910419.40', logo: 'iconfont' },
+        { name: 'rollup', url: 'https://www.rollupjs.com/', logo: 'rollup' },
+        { name: 'Three.js', url: 'http://www.webgl3d.cn/', logo: 'threejs' },
       ]
     }
   },

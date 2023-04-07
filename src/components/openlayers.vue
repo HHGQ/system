@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 82%">
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="一般地图" name="1">
       </el-tab-pane>
@@ -7,11 +7,20 @@
       </el-tab-pane>
       <el-tab-pane label="超图" name="3">
       </el-tab-pane>
+      <el-tab-pane label="可切换地图" name="4">
+      </el-tab-pane>
+      <el-tab-pane label="debug地图" name="5">
+      </el-tab-pane>
+      <el-tab-pane label="静态地图" name="6">
+      </el-tab-pane>
     </el-tabs>
     <keep-alive>
       <normalMap v-if="activeName==1" />
       <vectorMap v-else-if="activeName==2" />
       <superMap v-else-if="activeName==3" />
+      <transformMap v-else-if="activeName==4" />
+      <debugMap v-else-if="activeName==5" />
+      <staticMap v-else-if="activeName==6" />
     </keep-alive>
   </div>
 </template>
@@ -20,11 +29,17 @@
 import normalMap from './map/map.vue'
 import vectorMap from './map/vectorMap.vue'
 import superMap from './map/superMap.vue'
+import transformMap from './map/transformMap.vue'
+import debugMap from './map/debugMap.vue'
+import staticMap from './map/staticMap.vue'
 export default {
   components: {
     normalMap,
     vectorMap,
-    superMap
+    superMap,
+    transformMap,
+    debugMap,
+    staticMap
   },
   data() {
     return {

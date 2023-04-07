@@ -23,7 +23,8 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "off",
     "no-unused-components": "off",
     "no-undef": 0, // 是否可有未定义的变量
-    "no-irregular-whitespace": "off"
+    "no-irregular-whitespace": "off",
+    "no-unreachable": "off"
   },
   overrides: [
     {

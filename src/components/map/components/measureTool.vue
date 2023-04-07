@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import $ from "jquery";
 import ol from "openlayers";
 let listener;
 export default {
@@ -38,7 +39,9 @@ export default {
       helpTooltip: '',
       measureTooltipElement: null,
       measureTooltip: '',
-      modifyInteraction: null
+      modifyInteractionObj: {},
+      vectorLayer: [],
+      vectorLayerId: 1,
     }
   },
   mounted() {
@@ -49,7 +52,7 @@ export default {
     measure(type, isModify) {
       this.addMeasureLayer()
       this.addTip()
-      this.addInteractionDraw(type)
+      this.addInteractionDraw(type, isModify)
       isModify && this.addModifyDraw()
     },
     // 画测量图层
@@ -84,7 +87,7 @@ export default {
       })
     },
     // 添加交互
-    addInteractionDraw(type) {
+    addInteractionDraw(type, isModify) {
       // 移除已有交互
       this.cMap.removeInteraction(this.drawInteraction)
       this.drawInteraction = new ol.interaction.Draw({
@@ -117,17 +120,17 @@ export default {
       this.cMap.addInteraction(this.drawInteraction);
       this.drawInteraction.on('drawstart',
         function (evt) {
+          evt.feature.set('data', this.drawLayerIndex) // 给画的 feature 加上标记，用于清除 feature 及 tip
           this.drawstartCallback(evt)
         }, this);
  
       this.drawInteraction.on('drawend',
-        () => {
+        (evt) => {
           this.sketch = null;
           // 处理距离显示框
           this.measureTooltipElement.className = 'ol-tooltip ol-tooltip-static measureNum';
           this.measureTooltip.setOffset([0, -7]);
           this.measureTooltipElement = null;
-          this.createMeasureTooltip();
           // 处理 draw 交互
           ol.Observable.unByKey(listener);
           this.cMap.un('pointermove', e => {
@@ -139,45 +142,48 @@ export default {
           this.helpTooltipElement.classList.add('hidden');
           this.cMap.removeOverlay(this.measureLayerList[this.drawLayerIndex].helpTooltip)
           // 给取消按钮添加删除事件
-          let cancelsBtn = document.querySelectorAll('.ol-tooltip-close')
-          const self = this
-          for(let i = 0; i < cancelsBtn.length; i++) {
-            cancelsBtn[i].addEventListener('click', function() {
-              self.cMap.removeLayer(self.measureLayerList[Number(this.dataset.index)].layer)
-              self.cMap.removeOverlay(self.measureLayerList[Number(this.dataset.index)].tooltip)
-              self.$delete(self.measureLayerList, Number(this.dataset.index))
-            })
-          }
+          this.addDeleteEvent()
+          // 若是可编辑交互则添加额外的图层
+          isModify && this.addExtraLayer(evt)
         }, this);
     },
     addModifyDraw() {
-      this.modifyInteraction = new ol.interaction.Modify({
+      // this.cMap.removeInteraction(this.modifyInteraction)
+      this.modifyInteractionObj[this.drawLayerIndex] = new ol.interaction.Modify({
         source: this.measureSource
       })
-      this.cMap.addInteraction(this.modifyInteraction)
-      this.modifyInteraction.on(
+      this.cMap.addInteraction(this.modifyInteractionObj[this.drawLayerIndex])
+      this.modifyInteractionObj[this.drawLayerIndex].on(
         'modifystart',
         evt => {
           this.drawstartCallback(evt, true)
         },
         this
       )
-      this.modifyInteraction.on(
+      this.modifyInteractionObj[this.drawLayerIndex].on(
         'modifyend',
         evt => {
-          // this.measureTooltip.setOffset([0, -7]);
-          // this.measureTooltipElement = null;
-          // this.createMeasureTooltip();
+          // 处理 draw 交互
+          ol.Observable.unByKey(listener);
+          this.cMap.un('pointermove', e => {
+            this.pointerMoveHandler(e)
+          });
+          
+          // 给取消按钮添加删除事件
+          this.addDeleteEvent()
+
+          this.addExtraLayer(evt, true)
         },
         this
       )
     },
     drawstartCallback(evt, isModify) {
       this.sketch = isModify ? evt.features.item(0) : evt.feature;
-      var tooltipCoord = evt.coordinate;
-      listener = this.sketch.getGeometry().on('change', (evt) => {
-        var geom = evt.target;
-        var output;
+      let modifyIndex = this.sketch.get('data')
+      let tooltipCoord = evt.coordinate;
+      listener = this.sketch.getGeometry().on('change', (e) => {
+        let geom = e.target;
+        let output;
         if (geom instanceof ol.geom.Polygon) {
           output = this.formatArea(geom);
           tooltipCoord = geom.getInteriorPoint().getCoordinates();
@@ -185,12 +191,24 @@ export default {
           output = this.formatLength(geom);
           tooltipCoord = geom.getLastCoordinate();
         }
-        if (!isModify) {
-          let cancelBtn = `<span class="ol-tooltip-close" title="清除" data-index="${this.drawLayerIndex}" style="position: absolute; top: -7px;right: -16px;cursor: pointer;">x</span>`
-          this.measureTooltipElement.innerHTML = output + cancelBtn;
-        }
-        this.measureTooltip.setPosition(tooltipCoord);
+        let cancelBtn = `<span class="ol-tooltip-close" title="清除" data-index="${modifyIndex}" style="position: absolute; top: -7px;right: -16px;cursor: pointer;">x</span>`
+        this.measureLayerList[modifyIndex].measureTooltipElement.innerHTML = output + cancelBtn;
+        this.measureLayerList[modifyIndex].measureTooltip.setPosition(tooltipCoord);
       });
+    },
+    addDeleteEvent() {
+      let cancelsBtn = document.querySelectorAll('.ol-tooltip-close')
+      const self = this
+      for(let i = 0; i < cancelsBtn.length; i++) {
+        $(cancelsBtn[i]).off('click')
+        $(cancelsBtn[i]).on('click', function() {
+          self.cMap.removeLayer(self.measureLayerList[Number(this.dataset.index)].layer)
+          self.cMap.removeOverlay(self.measureLayerList[Number(this.dataset.index)].measureTooltip)
+          self.$delete(self.measureLayerList, Number(this.dataset.index))
+          self.cMap.removeInteraction(self.modifyInteractionObj[Number(this.dataset.index)])
+          self.$delete(self.modifyInteractionObj, Number(this.dataset.index))
+        })
+      }
     },
     pointerMoveHandler(evt) {
       if (evt.dragging) {
@@ -251,7 +269,8 @@ export default {
       });
       this.cMap.addOverlay(this.helpTooltip);
       this.measureLayerList[this.drawLayerIndex].helpTooltip = this.helpTooltip
-      this.measureLayerList[this.drawLayerIndex].tooltip = this.measureTooltip // 防止重复添加测距时，被删掉
+      this.measureLayerList[this.drawLayerIndex].measureTooltip = this.measureTooltip // 防止重复添加测距时，被删掉
+      this.measureLayerList[this.drawLayerIndex].measureTooltipElement = this.measureTooltipElement
     },
     createMeasureTooltip() {
       if (this.measureTooltipElement) {
@@ -266,10 +285,123 @@ export default {
       });
       this.cMap.addOverlay(this.measureTooltip);
     },
+    addExtraLayer(evt, isModify) {
+      let feature = isModify ? evt.features.item(0) : evt.feature
+      let featureData = feature.get('data')
+      this.vectorLayer.forEach((item, index) => {
+        if (item.getSource().getFeatures()[0].get('data') == featureData) this.cMap.removeLayer(this.vectorLayer[index])
+      })
+      let gpsArr = feature.getGeometry().getCoordinates()
+      console.log(gpsArr)
+      if (!gpsArr.length) return
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[0],
+          fill: 'rgba(255, 0, 0, 1)',
+          stroke: 'rgba(255, 0, 0, 1)',
+          circleRadius: 14,
+          strokeWidth: 7,
+          featureData
+        }
+      )
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[0],
+          fill: 'rgba(255, 255, 255, 1)',
+          stroke: 'rgba(255, 255, 255, 1)',
+          circleRadius: 7,
+          strokeWidth: 7,
+          featureData
+        }
+      )
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[gpsArr.length - 1],
+          fill: 'red',
+          stroke: 'red',
+          circleRadius: 14,
+          strokeWidth: 7,
+          featureData
+        }
+      )
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[gpsArr.length - 1],
+          fill: 'rgba(255, 0, 0, 0.15)',
+          stroke: 'rgba(255, 0, 0, 1)',
+          circleRadius: 35,
+          strokeWidth: 1,
+          featureData
+        }
+      )
+
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[0],
+          text: '起点',
+          fill: 'blue',
+          stroke: undefined,
+          featureData
+        },
+        true
+      )
+      this.addVectorLayer(
+        {
+          pointsList: gpsArr[gpsArr.length - 1],
+          text: '终点',
+          fill: 'blue',
+          stroke: undefined,
+          featureData
+        },
+        true
+      )
+    },
+    addVectorLayer(option, isText = false) {
+      let source = new ol.source.Vector()
+      this.vectorLayer[this.vectorLayerId] = new ol.layer.Vector({
+        source
+      })
+      this.cMap.addLayer(this.vectorLayer[this.vectorLayerId])
+      this.vectorLayerId++
+      let feature = new ol.Feature({
+        geometry: new ol.geom.Point(option.pointsList || []),
+        name: option.text || '',
+        data: option.featureData
+      })
+      if (isText) {
+        feature.setStyle(
+          new ol.style.Style({
+            text: new ol.style.Text({
+              textAlign: 'center',
+              textBaseline: 'middle',
+              font: '16px',
+              offsetX: 0,
+              offsetY: 0,
+              text: feature.get('name'),
+              fill: new ol.style.Fill({ color: option.fill || '#FFFFFF' }),
+              stroke: option.stroke == undefined ? '' : new ol.style.Stroke({ color: option.stroke || '#039B03', width: 14 })
+            })
+          })
+        )
+      } else {
+        feature.setStyle(
+          new ol.style.Style({
+            image: new ol.style.Circle({
+              fill: new ol.style.Fill({ color: option.fill || 'rgba(255, 255, 255, 0.4)' }),
+              stroke: option.stroke == undefined ? '' : new ol.style.Stroke({ color: option.stroke || 'rgba(0, 193, 192, 0.5)', width: option.strokeWidth || 14 }),
+              radius: option.circleRadius || 13
+            }),
+            fill: new ol.style.Fill({ color: 'rgba(255, 255, 255, 0.4)' }),
+            stroke: new ol.style.Stroke({ color: '#3399CC', width: 1.25 })
+          })
+        )
+      }
+      source.addFeature(feature)
+    },
     clearDraw() {
       for(let key in this.measureLayerList) {
         this.cMap.removeLayer(this.measureLayerList[key].layer)
-        this.cMap.removeOverlay(this.measureLayerList[key].tooltip)
+        this.cMap.removeOverlay(this.measureLayerList[key].measureTooltip)
       }
       this.measureLayerList = {}
     },
@@ -287,18 +419,18 @@ export default {
         this.cMap.removeInteraction(this.drawInteraction)
         this.drawInteraction = null
         this.cMap.removeLayer(this.measureLayerList[this.drawLayerIndex].layer)
-        this.cMap.removeOverlay(this.measureLayerList[this.drawLayerIndex].tooltip)
+        this.cMap.removeOverlay(this.measureLayerList[this.drawLayerIndex].measureTooltip)
         this.cMap.removeOverlay(this.measureLayerList[this.drawLayerIndex].helpTooltip)
         this.$delete(this.measureLayerList, this.drawLayerIndex)
       }
-      if (this.modifyInteraction) {
-        this.cMap.removeInteraction(this.modifyInteraction)
-        this.modifyInteraction = null
+      if (this.modifyInteractionObj[this.drawLayerIndex]) {
+        this.cMap.removeInteraction(this.modifyInteractionObj[this.drawLayerIndex])
+        this.$delete(self.modifyInteractionObj, Number(this.dataset.index))
       }
     },
     finishModify() {
-      this.cMap.removeInteraction(this.modifyInteraction)
-      this.modifyInteraction = null
+      this.cMap.removeInteraction(this.modifyInteractionObj[this.drawLayerIndex])
+      this.$delete(self.modifyInteractionObj, Number(this.dataset.index))
     }
   }
 }

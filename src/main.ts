@@ -9,6 +9,7 @@ import 'view-design/dist/styles/iview.css';
 import UmyUi from 'umy-ui'
 import 'umy-ui/lib/theme-chalk/index.css';// 引入样式
 import 'openlayers/css/ol.css';// 引入样式
+import '@/assets/css/openlayers.less'
 import '@/utils/request.js'
 import "./main-config.js";
 import i18n from './i18n/index'

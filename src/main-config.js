@@ -10,5 +10,3 @@ Vue.use(ElementUI, {
 // 基于Vue的颜色选择器插件
 import vcolorpicker from 'vcolorpicker'
 Vue.use(vcolorpicker)
-
-import './api/b'

@@ -1,7 +1,7 @@
 <template>
   <div style="width: 100%;height: 20px;">
     <img :src="require('@/assets/timeline/fastRewind_normal.png')" title="快退30秒" alt="" width="20px" height="20px" style="cursor: pointer;position:absolute" @click="iconChangeTime('rewind')">
-    <canvas id="timelineSimple" width="1000" height="20"></canvas>
+    <canvas id="timelineSimple" width="1000" height="320"></canvas>
     <img :src="require('@/assets/timeline/fastForward_normal.png')" title="快进30秒" alt="" width="20px" height="20px" style="cursor: pointer;position:absolute" @click="iconChangeTime('forward')">
     <div style="cursor: pointer;" @click="startPlay">开始播放</div>
     <div style="cursor: pointer;" @click="stopPlay">停止播放</div>
@@ -23,6 +23,12 @@ export default {
     this.initData('03:02:51 /03:07:51')
     this.draw(0, '03:02:51 /03:07:51');
     // this.startPlay()
+    
+      let image = new Image()
+      image.src = require('@/assets/axios.png')
+      image.onload = () => {
+        this.canvasContext.drawImage(image,0,0);
+      }
   },
   methods: {
     startPlay() {
@@ -80,14 +86,15 @@ export default {
     _onDrag(e) {
       this.isDraging = true;
       this.dragTime(e)
-      document.onmousemove = this._.throttle((moveEvent) => {
+      document.getElementById('timelineSimple').onmousemove = this._.throttle((moveEvent) => {
         if (moveEvent.srcElement != this.$canvas) return this.isDraging = false
         this.dragTime(moveEvent)
       }, 200);
 
-      document.onmouseup = () => {
-        document.onmousemove = null;
-        document.onmouseup = null;
+      document.getElementById('timelineSimple').onmouseup = (event) => {
+        console.log(event)
+        document.getElementById('timelineSimple').onmousemove = null;
+        document.getElementById('timelineSimple').onmouseup = null;
         this.isDraging = false;
         this.timeUpdate(this.processTime);
       };

@@ -111,4 +111,4 @@ const gcj02towgs84 = (lng, lat) => {
   }
 };
 
-// export { wgs84togcj02, gcj02towgs84 };
+export { wgs84togcj02, gcj02towgs84 };
