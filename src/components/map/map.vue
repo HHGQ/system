@@ -141,8 +141,8 @@ export default {
         // console.log(this.map.getView().getProjection().getMetersPerUnit()) // 像素转换单位为米
         // console.log(this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature).get('features'))
       });
-      // console.log(this.map.getLayers().getArray()[0].getSource().getProjection().getExtent())
-      // console.log(this.map.getLayers().getArray()[0].getSource().getTileGrid().getOrigin())
+      console.log(this.map.getLayers().getArray()[0].getSource().getProjection().getExtent())
+      console.log(this.map.getLayers().getArray()[0].getSource().getTileGrid().getOrigin())
 
     },
     addApiLayer() {

@@ -78,8 +78,6 @@ export default {
       var activityLayer = new ol.layer.Vector({
         source: new ol.source.Vector(),
       });
-      console.log(this.center[0] - (650 * 1000) / 2 + 390 * 1000,
-          this.center[1] - (365 * 1000) / 2 + (365 - 145) * 1000, 111)
       // 创建一个活动图标需要的Feature，并设置位置
       var activity = new ol.Feature({
         // geometry: new ol.geom.Point([
