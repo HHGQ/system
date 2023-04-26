@@ -203,7 +203,8 @@ export default {
     },
     resetMap() {
       this.cMap.getView().setCenter([112.9819047, 23.66093])
-      // this.cMap.getView().setZoom(14)
+      this.cMap.getView().setZoom(14)
+      this.cMap.getView().setRotation(0)
     },
     printMap() {
       html2canvasPrint(document.getElementById("map1"));

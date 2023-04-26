@@ -195,12 +195,8 @@ export default {
       // 绘制比例尺
       this.drawTimelineScale(this.timeSpacing);
 
-      // canvas X轴中心点（当前时间指示刻度）
-      const xCenterPoint = this.$canvas.width / 2;
       // 绘制当前时间指针
-      this.drawLine(xCenterPoint - this.pointWidth / 2, this.$canvas.height, this.pointWidth, this.pointColor);
-      this.drawArea(xCenterPoint - 54, 4, xCenterPoint + 54, 18, this.pointColor);
-      this.drawText(xCenterPoint, 6, `${this.dateTime(this.currentTime, 'YYYY/MM/DD HH:mm:ss')}`, this.textColor, 'center', 'top');
+      this.drawCurrentTimeLine()
 
       // 鼠标滚轮事件
       this.$canvas.onwheel = this._onZoom;
@@ -343,6 +339,14 @@ export default {
       this.canvasContext.stroke();
     },
 
+    drawCurrentTimeLine() {
+      // canvas X轴中心点（当前时间指示刻度）
+      const xCenterPoint = this.$canvas.width / 2;
+      this.drawLine(xCenterPoint - this.pointWidth / 2, this.$canvas.height, this.pointWidth, this.pointColor);
+      this.drawArea(xCenterPoint - 54, 4, xCenterPoint + 54, 18, this.pointColor);
+      this.drawText(xCenterPoint, 6, `${this.dateTime(this.currentTime, 'YYYY/MM/DD HH:mm:ss')}`, this.textColor, 'center', 'top');
+    },
+
     // 绘制线条
    drawLine(x, y, width = 1, color = this.scaleColor) {
       this.canvasContext.beginPath();
@@ -371,6 +375,17 @@ export default {
       this.canvasContext.fillStyle = bgColor;
       this.canvasContext.fill();
     },
+    /**
+     * @param pointWidth 当前时间指针宽度
+     * @param timePerPixel 每1px所占时间单位（秒）
+     * @param scaleHeight 刻度高度
+     * @param scaleSpacing 刻度间距
+     * @param timeSpacing 时间间距
+     * @param screenScaleCount 当前屏可绘制刻度数量
+     * @param startTime 开始时间(是通过中间时间来计算)
+     * @param drawLine 画线函数
+     * @param drawText 画文字函数
+     */
     drawHelper({pointWidth, timePerPixel, scaleHeight, scaleSpacing, timeSpacing, screenScaleCount, startTime, drawLine, drawText}) {
       if (timeSpacing === 1) {
         for(let i = 0; i < screenScaleCount; i++) {
@@ -398,10 +413,10 @@ export default {
 
       // 密度为10s时
       if (timeSpacing === 10) {
-        const timeOffset = +this.dateTime(startTime, 's') % 10;
-        const xOffset = timeOffset / timePerPixel;
+        const timeOffset = +this.dateTime(startTime, 's') % 10; // 除以 10 后剩余的秒数,即 canvas 左边边界线对应的秒数
+        const xOffset = timeOffset / timePerPixel; // 除以 10 后剩余秒数占用的 像素,即 canvas 左边边界线对应的刻度位置
         for(let i = 0; i < screenScaleCount; i++) {
-          const x = i * scaleSpacing - xOffset - pointWidth / 2;
+          const x = i * scaleSpacing - xOffset - pointWidth / 2; // 因为画的时间指针的终点位置是固定的，所以要把下方刻度线右移指针宽度的 1/2
           const time = Math.ceil(startTime + i * timeSpacing - timeOffset);
           // 1分钟刻度
           if (time % 60 === 0) {

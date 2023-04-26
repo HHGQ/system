@@ -124,6 +124,7 @@ export default {
               projection: "EPSG:4326",
               // projection: 'EPSG:4490'
             }),
+            new ol.control.FullScreen()
           ]),
         interactions: ol.interaction.defaults({
           doubleClickZoom: false, // 取消双击放大

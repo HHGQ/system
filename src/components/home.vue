@@ -42,6 +42,7 @@ export default {
         { name: 'JavaScript', url: 'https://www.w3school.com.cn/js/index.asp', logo: 'w3c' },
         { name: 'jQuery', url: 'https://www.w3school.com.cn/jquery/index.asp', logo: 'w3c' },
         { name: 'React', url: 'https://react.docschina.org/', logo: 'react' },
+        { name: 'Next.js', url: 'https://www.nextjs.cn/', logo: 'nextjs' },
         { name: '微信小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', logo: 'wxxcx' },
         { name: '阿里巴巴图标库', url: 'https://www.iconfont.cn/collections/index?spm=a313x.7781069.1998910419.40', logo: 'iconfont' },
         { name: 'rollup', url: 'https://www.rollupjs.com/', logo: 'rollup' },
@@ -61,6 +62,8 @@ export default {
 .learn_containter {
   display: flex;
   flex-wrap: wrap;
+  overflow: auto;
+  height: 92.5%;
   /deep/ .el-card {
     height: 201px;
     width: 200px;

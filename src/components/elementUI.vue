@@ -41,6 +41,14 @@
           <i class="el-icon-setting"></i>
           <span slot="title">可合并/取消合并表格</span>
         </el-menu-item>
+        <el-menu-item index="5">
+          <i class="el-icon-setting"></i>
+          <span slot="title">树选择框</span>
+        </el-menu-item>
+        <el-menu-item index="6">
+          <i class="el-icon-setting"></i>
+          <span slot="title">树</span>
+        </el-menu-item>
         <el-menu-item index="3" disabled>
           <i class="el-icon-document"></i>
           <span slot="title">导航</span>
@@ -51,6 +59,8 @@
       <clientImportAndExport v-show="showKey==2"/>
       <notify v-show="showKey==3"/>
       <tableUI v-show="showKey==4"/>
+      <treeSelect v-show="showKey==5" />
+      <tree v-show="showKey==6" />
     </el-col>
   </el-row>
 </template>
@@ -59,11 +69,15 @@
 import clientImportAndExport from './elementUI/clientImportAndExport.vue'
 import notify from './elementUI/notify.vue'
 import tableUI from './elementUI/table.vue'
+import treeSelect from './elementUI/treeSelect.vue'
+import tree from './elementUI/tree.vue'
 export default {
   components: {
     clientImportAndExport,
     notify,
-    tableUI
+    tableUI,
+    treeSelect,
+    tree
   },
   data() {
     return {
