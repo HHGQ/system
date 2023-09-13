@@ -421,7 +421,7 @@ export default {
           // 1分钟刻度
           if (time % 60 === 0) {
             drawLine(x, scaleHeight.height4);
-            drawText(x, scaleHeight.height5 + 13, `${this.dateTime(time, 'HH:mm')}`);
+            drawText(x, scaleHeight.height5 + 13, `${this.dateTime(time, 'HH:mm:ss')}`);
             continue;
           }
           // 10秒刻度

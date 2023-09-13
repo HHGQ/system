@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%">
     <el-select
       v-model="input"
       popper-class="popperClass"
@@ -25,6 +25,30 @@
         ></el-tree>
       </div>
     </div>
+
+    <el-popover
+      placement="bottom"
+      width="200"
+      trigger="click">
+      <!-- <div
+        style="
+          width: 218px;
+          height: 200px;
+          overflow: auto;
+          border-radius: 5px;
+          margin-top: 5px;
+          background-color: white;
+          box-shadow: 0px 2px 12px 0px rgb(0 0 0 / 21%);
+        "
+      > -->
+        <el-tree
+          :data="data"
+          :props="defaultProps"
+          @node-click="handleNodeClick"
+        ></el-tree>
+      <!-- </div> -->
+      <el-input slot="reference" :value="input" placeholder="请输入内容" style="margin-top:220px"></el-input>
+    </el-popover>
   </div>
 </template>
 

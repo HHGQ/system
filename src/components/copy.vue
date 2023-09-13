@@ -80,10 +80,12 @@ export default {
         // 发送请求获取视频二进制流
         this.$ajax({
           // url: 'https://nickdesaulniers.github.io/netfix/demo/frag_bunny.mp4',
-          url: 'http://localhost:8080/static/frag_bunny.mp4',
+          // url: 'http://localhost:8080/static/frag_bunny.mp4',
+          // url: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4',
           // url: 'http://localhost:8080/static/video.mp4',
           // responseType: 'blob' // 若是blob，则先转成arrayBuffer，再appendBuffer
-          responseType: 'arraybuffer'
+          url: 'http://localhost:3000/video',
+          responseType: 'arraybuffer',
         })
           .then((response) => {
             sourceBuffer.appendBuffer(response);

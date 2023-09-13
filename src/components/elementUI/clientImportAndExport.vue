@@ -33,9 +33,15 @@ export default {
         '性别': '男'
     }];
       // 新建空workbook，然后加入worksheet
-      const ws = XLSX.utils.json_to_sheet(data)
+      const sheet1 = XLSX.utils.json_to_sheet(data)
       // 设置每列的列宽，10代表10个字符，注意中文占2个字符
-      ws['!cols'] = [
+      sheet1['!cols'] = [
+        { wch: 10 },
+        { wch: 30 },
+        { wch: 25 }
+      ]
+      const sheet2 = XLSX.utils.json_to_sheet(data)
+      sheet2['!cols'] = [
         { wch: 10 },
         { wch: 30 },
         { wch: 25 }
@@ -43,7 +49,8 @@ export default {
       // 新建book
       const wb = XLSX.utils.book_new()
       // 生成xlsx文件(book,sheet数据,sheet命名)
-      XLSX.utils.book_append_sheet(wb, ws, '数据详情')
+      XLSX.utils.book_append_sheet(wb, sheet1, '数据详情')
+      XLSX.utils.book_append_sheet(wb, sheet2, '备份数据详情')
       // 写文件(book,xlsx文件名称)
       XLSX.writeFile(wb, '列表详情.xlsx')
     },

@@ -54,6 +54,22 @@ function initLayer() {
         })
       ]
       break;
+    case 4:
+      layerArr.push(new ol.layer.Tile({
+        source: new ol.source.XYZ({
+          crossOrigin: 'anonymous', // 导出图片是否允许跨域
+          tileLoadFunction: function(imageTile, src) {
+            const xhr = new XMLHttpRequest()
+            xhr.open('GET', src)
+            xhr.setRequestHeader('Authorizatioin', 'tokenxxx')
+            xhr.onload = function() {
+              imageTile.getImage().src = src
+            }
+            xhr.send()
+          }
+        })
+      }));
+      break
   }
   return layerArr
 }
