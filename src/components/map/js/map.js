@@ -92,10 +92,10 @@ function transform3857To4326(lonlat) {
  * @returns [lon, lat]
  */
 function transform4326To3857(lonlat) {
-  if (GloalConfig.EPSG == '3857') {
-    return ol.proj.transform(lonlat)
-  }
-  return lonlat
+  // if (GloalConfig.EPSG == '3857') {
+    return ol.proj.transform(lonlat, "EPSG:4326", "EPSG:3857")
+  // }
+  // return lonlat
 }
 
 /**

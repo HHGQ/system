@@ -5,9 +5,7 @@
     <el-button type="success" size="small" @click="inMapView"
       >判断一下</el-button
     >
-    <el-button type="success" size="small" @click="moveup"
-      >上移</el-button
-    >
+    <el-button type="success" size="small" @click="moveup">上移</el-button>
     <el-button type="success" size="small" @click="fitToArea"
       >最大化展示某区域</el-button
     >
@@ -15,7 +13,11 @@
     <div v-show="this.overlayText" id="popup" class="ol-popup">
       <a id="popup-closer" class="ol-popup-closer">X</a>
       <div id="popup-content" class="popup-content">{{ overlayText }}</div>
-      <el-button v-if="showOverlayButton" type="success" size="small" @click="updateFeature"
+      <el-button
+        v-if="showOverlayButton"
+        type="success"
+        size="small"
+        @click="updateFeature"
         >变更坐标</el-button
       >
     </div>
@@ -24,27 +26,27 @@
 
 <script>
 import ol from "openlayers";
-import proj4 from 'proj4'
-import Map from 'ol/Map';
-import $ from 'jquery'
-import { initLayer, transform3857To4326 } from "./js/map";
+import proj4 from "proj4";
+import Map from "ol/Map";
+import $ from "jquery";
+import { initLayer, transform3857To4326, transform4326To3857 } from "./js/map";
 import {
   startScreenShot,
   html2canvasPrint,
   domtoimagePrint,
 } from "./js/mapTool";
-import { getPoint } from '@/api/mapApi'
-import mapTool from './components/mapTool.vue'
+import { getPoint } from "@/api/mapApi";
+import mapTool from "./components/mapTool.vue";
 
 export default {
   components: {
-    mapTool
+    mapTool,
   },
   data() {
     return {
       map: null,
       overlay: null,
-      overlayText: '',
+      overlayText: "",
       showOverlayButton: false,
       featureData: null,
       source: null,
@@ -54,10 +56,10 @@ export default {
   mounted() {
     this.initMap();
     // this.addLayer();
-    this.addApiLayer()
-    this.addLineString()
+    // this.addApiLayer()
+    this.addLineString();
 
-    this.addDynamicsOverlay()
+    this.addDynamicsOverlay();
     document.getElementById("popup-closer").addEventListener("click", (e) => {
       this.overlay.setPosition(undefined);
       document.getElementById("popup-closer").blur();
@@ -67,7 +69,12 @@ export default {
   methods: {
     fitToArea() {
       // 让地图最大化完全地显示区域[112.9819047, 23.66093, 113.0019047, 23.90093]
-      this.map.getView().fit([112.9819047, 23.66093, 113.0019047, 23.76093], this.map.getSize());
+      this.map
+        .getView()
+        .fit(
+          [112.9819047, 23.66093, 113.0019047, 23.76093],
+          this.map.getSize()
+        );
     },
     moveup() {
       var view = this.map.getView();
@@ -75,19 +82,22 @@ export default {
       // 让地图中心的y值减少，即可使得地图向上移动，减少的值根据效果可自由设定
       mapCenter[1] -= 0.003; // 动态加减的坐标，需要用 render() 才生效
       view.setCenter(mapCenter);
-      this.map.render()
+      this.map.render();
     },
     inMapView() {
-      let extent = this.map.getView().calculateExtent(this.map.getSize())
-      console.log(extent)
-      extent = transform3857To4326(extent)
+      let extent = this.map.getView().calculateExtent(this.map.getSize());
+      console.log(extent);
+      extent = transform3857To4326(extent);
       // let flag = ol.extent.containsExtent(extent, this.judgeFeature.getGeometry().getExtent())
-      let flag = ol.extent.containsExtent(extent, [112.96, 23.64,112.96, 23.64])
-      console.log(flag,this.source.getFeatures()[0].getGeometry().getExtent())
+      let flag = ol.extent.containsExtent(
+        extent,
+        [112.96, 23.64, 112.96, 23.64]
+      );
+      console.log(flag, this.source.getFeatures()[0].getGeometry().getExtent());
     },
     initMap() {
       proj4.defs("EPSG:4490", "+proj=longlat +ellps=GRS80 +no_defs");
-      ol.proj.setProj4(proj4) // 若直接在入口index.html直接引入 proj4.js，就不需要调用这个
+      ol.proj.setProj4(proj4); // 若直接在入口index.html直接引入 proj4.js，就不需要调用这个
       let projection1 = new ol.proj.get("EPSG:4490");
       projection1.setExtent([-180, -90, 180, 90]);
       // var projectionExtent = projection1.getExtent();
@@ -103,10 +113,10 @@ export default {
         target: "map1",
         layers: initLayer(),
         view: new ol.View({
-          center: [112.9819047, 23.66093],
           zoom: 14,
-          // center: [12630897.63, 2653513.69], // 3857 的中心点
+          // center: [12577088.100058164, 2712145.049551703], // 3857 的中心点
           // projection: "EPSG:3857",
+          center: [112.9819047, 23.66093],
           projection: "EPSG:4326",
           // projection: 'EPSG:4490'
         }),
@@ -124,71 +134,86 @@ export default {
               projection: "EPSG:4326",
               // projection: 'EPSG:4490'
             }),
-            new ol.control.FullScreen()
+            new ol.control.FullScreen(),
           ]),
         interactions: ol.interaction.defaults({
           doubleClickZoom: false, // 取消双击放大
-        })
+        }),
       });
-      // 双击也会触发
+      // 双击也会触发add
       // this.map.on('click', (e) => {
       //   console.log(this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature).get('features'))
       // })
       // 只有单击才触发
       this.map.on("singleclick", (e) => {
-        console.log('click')
-        const feature = this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature)
-        this.addOverlay(feature, e.coordinate)
+        console.log("click");
+        const feature = this.map.forEachFeatureAtPixel(
+          e.pixel,
+          (feature, layer) => feature
+        );
+        this.addOverlay(feature, e.coordinate);
         // console.log(this.map.getView().getProjection().getMetersPerUnit()) // 像素转换单位为米
         // console.log(this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature).get('features'))
       });
-      console.log(this.map.getLayers().getArray()[0].getSource().getProjection().getExtent())
-      console.log(this.map.getLayers().getArray()[0].getSource().getTileGrid().getOrigin())
-
+      console.log(
+        this.map
+          .getLayers()
+          .getArray()[0]
+          .getSource()
+          .getProjection()
+          .getExtent()
+      );
+      console.log(
+        this.map.getLayers().getArray()[0].getSource().getTileGrid().getOrigin()
+      );
     },
     addApiLayer() {
       this.source = new ol.source.Vector({
         loader: (extent, resolution, projection) => {
-          let arr = [].concat(transform3857To4326([extent[0], extent[1]])).concat(transform3857To4326([extent[2], extent[3]]))
+          let arr = []
+            .concat(transform3857To4326([extent[0], extent[1]]))
+            .concat(transform3857To4326([extent[2], extent[3]]));
           getPoint({
             leftTopGpsX: arr[0],
             leftTopGpsY: arr[1],
             rightBottomGpsX: arr[2],
-            rightBottomGpsY: arr[3]
-          }).then(res => {
-            if (!res.length) return
-            console.log(res, 'res')
-            let features = []
+            rightBottomGpsY: arr[3],
+          }).then((res) => {
+            if (!res.length) return;
+            console.log(res, "res");
+            let features = [];
             res.forEach((item, index) => {
               features[index] = new ol.Feature({
                 geometry: new ol.geom.Point([item.gpsX, item.gpsY]),
                 data: {
                   gpsX: item.gpsX,
                   gpsY: item.gpsY,
-                  id: String(item.id)
+                  id: String(item.id),
                 },
               });
-              features[index].setStyle(new ol.style.Style({
-                image: new ol.style.Icon({
-                  src: require("@/common/img/location.png"),
-                }),
-                text: new ol.style.Text({
-                  text: String(item.id),
-                  fill: new ol.style.Fill({
-                    color: "black",
+              features[index].setStyle(
+                new ol.style.Style({
+                  image: new ol.style.Icon({
+                    src: require("@/common/img/location.png"),
                   }),
-                }),
-              }))
-              features[index].setId(String(item.id)) // setId 可以保持唯一性，防止后端返回数据重复，导致点位重复
-            })
-            this.source.addFeatures(features)
-          })
+                  text: new ol.style.Text({
+                    text: String(item.id),
+                    fill: new ol.style.Fill({
+                      color: "black",
+                    }),
+                  }),
+                })
+              );
+              features[index].setId(String(item.id)); // setId 可以保持唯一性，防止后端返回数据重复，导致点位重复
+            });
+            this.source.addFeatures(features);
+          });
         },
         strategy: ol.loadingstrategy.tile(
           ol.tilegrid.createXYZ({
-            tileSize: 512
+            tileSize: 512,
           })
-        )
+        ),
       });
       let layer = new ol.layer.Vector({
         source: this.source,
@@ -208,13 +233,13 @@ export default {
         data: {
           gpsX: 112.96,
           gpsY: 23.64,
-          id: String(333)
+          id: String(333),
         },
         style: new ol.style.Style({
           image: new ol.style.Icon({
             src: require("@/common/img/location.png"),
             width: 20,
-            height: 20
+            height: 20,
           }),
           text: new ol.style.Text({
             text: String(333),
@@ -222,9 +247,9 @@ export default {
               color: "black",
             }),
           }),
-        })
-      })
-      this.source.addFeature(this.judgeFeature)
+        }),
+      });
+      this.source.addFeature(this.judgeFeature);
     },
     addLayer() {
       this.source = new ol.source.Vector();
@@ -239,21 +264,23 @@ export default {
             data: {
               gpsX: coordinates[0],
               gpsY: coordinates[1],
-              id: `${i}_${j}`
+              id: `${i}_${j}`,
             },
-            labelPoint: new ol.geom.Polygon()
+            labelPoint: new ol.geom.Polygon(),
           });
-          feature.setStyle(new ol.style.Style({
-            image: new ol.style.Icon({
-              src: require("@/common/img/location.png"),
-            }),
-            text: new ol.style.Text({
-              text: `${i}_${j}`,
-              fill: new ol.style.Fill({
-                color: "black",
+          feature.setStyle(
+            new ol.style.Style({
+              image: new ol.style.Icon({
+                src: require("@/common/img/location.png"),
               }),
-            }),
-          })) // 只有在这setStyle,feature.getStyle() 才有值
+              text: new ol.style.Text({
+                text: `${i}_${j}`,
+                fill: new ol.style.Fill({
+                  color: "black",
+                }),
+              }),
+            })
+          ); // 只有在这setStyle,feature.getStyle() 才有值
           this.source.addFeature(feature);
         }
       }
@@ -276,7 +303,8 @@ export default {
           style: function (feature, resolution) {
             var size = feature.get("features").length;
             if (size == 1) {
-              return new ol.style.Style({ // 这个优先级比feature的style高
+              return new ol.style.Style({
+                // 这个优先级比feature的style高
                 image: new ol.style.Icon({
                   src: require("@/common/img/location.png"),
                 }),
@@ -286,7 +314,7 @@ export default {
                     color: "black",
                   }),
                 }),
-                zIndex: 0 // 值越大，优先级越高
+                zIndex: 0, // 值越大，优先级越高
               });
             } else {
               return new ol.style.Style({
@@ -327,99 +355,177 @@ export default {
     },
     // 可画线、矩形、多边形
     addLineString() {
-      let features = []
+      let features = [];
+      for(let j = 0;j< 1000;j++) {
+        // 用 Polygon 画扇形
+        let longlat = [112.92014122009279+j*0.005, 23.669657707214355]
+        let EPSG = this.map.getView().getProjection().getCode()
+        var center = EPSG == "EPSG:3857" ? transform4326To3857(longlat) : longlat; // 扇形的中心点
+        // var startAngle = Math.PI/4; // 扇形的起始角度（弧度）
+        // var endAngle = Math.PI; // 扇形的结束角度（弧度）
+        let directAngle = 90 // 朝向角度(°)
+        let levelAngle = 40 // 水平可视角度(°)
+        var startAngle = (90 - directAngle - levelAngle / 2) * Math.PI / 180; // 扇形的起始角度（弧度）
+        var endAngle = (90 - directAngle + levelAngle / 2) * Math.PI / 180; // 扇形的结束角度（弧度）
+        var radius = 500; // 半径（单位：米）
+        // 中心点转换成米,为了配合半径一起计算边界点的坐标数据
+        var centerProj = EPSG == "EPSG:3857" ? center : ol.proj.fromLonLat(center); // 转成3857
+        // 计算扇形的边界点
+        var coordinates = [center];
+        var numPoints = 32; // 边界点的数量
+        for (var i = 0; i <= numPoints; i++) {
+          var angle = startAngle + (i / numPoints) * (endAngle - startAngle);
+          // if (EPSG == "EPSG:3857") {
+            let x = centerProj[0] + radius * Math.cos(angle);
+            let y = centerProj[1] + radius * Math.sin(angle);
+            coordinates.push(EPSG == "EPSG:3857" ? [x, y] : ol.proj.toLonLat([x, y]));
+          // } else {
+          //   let x = centerProj[0] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.cos(angle) / Math.cos(center[1] * Math.PI / 180);
+          //   let y = centerProj[1] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.sin(angle);
+          //   coordinates.push(ol.proj.toLonLat([x, y])); // 转成经纬度
+          // }
+        }
+  
+        var sector = new ol.geom.Polygon([coordinates]);
+        // 创建一个Feature对象并添加扇形
+        var sectorFeature = new ol.Feature(sector);
+        var sectorSource = new ol.source.Vector();
+        sectorSource.addFeature(sectorFeature);
+  
+        // 创建一个矢量图层并将其添加到地图上
+        var sectorLayer = new ol.layer.Vector({
+          source: sectorSource,
+          style: new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: 'rgba(255, 0, 0, 0.2)' // 设置填充颜色和透明度
+            }),
+            stroke: new ol.style.Stroke({
+              color: 'red', // 设置边界线颜色
+              width: 2 // 设置边界线宽度
+            })
+          })
+        });
+  
+        // 将矢量图层添加到地图上
+        this.map.addLayer(sectorLayer);
+      }
       // 用 Polygon 画多边形
-      var polygon1 = new ol.geom.Polygon([[[112.96, 23.64], [113, 23.68], [113, 23.70], [113, 23.74], [112.96, 23.64]]]);
+      var polygon1 = new ol.geom.Polygon([
+        [
+          [112.96, 23.64],
+          [113, 23.68],
+          [113, 23.7],
+          [113, 23.74],
+          [112.96, 23.64],
+        ],
+      ]);
       // polygon.applyTransform(ol.proj.getTransform('EPSG:4326', 'EPSG:3857')); // 4326 转3857
       var polygonFeature1 = new ol.Feature({
         geometry: polygon1,
         data: {
-          type: 'polygon'
-        }
+          type: "polygon",
+        },
       });
-      features.push(polygonFeature1)
+      features.push(polygonFeature1);
       // 用 LineString 画多边形
-      var polygon2 = new ol.geom.LineString([[112.96, 23.64], [112.97, 23.68], [112.99, 23.70], [113, 23.74], [112.96, 23.64]]);
+      var polygon2 = new ol.geom.LineString([
+        [112.96, 23.64],
+        [112.97, 23.68],
+        [112.99, 23.7],
+        [113, 23.74],
+        [112.96, 23.64],
+      ]);
       // polygon.applyTransform(ol.proj.getTransform('EPSG:4326', 'EPSG:3857')); // 4326 转3857
       var polygonFeature2 = new ol.Feature({
         geometry: polygon2,
         data: {
-          type: 'polygon'
-        }
+          type: "polygon",
+        },
       });
-      features.push(polygonFeature2)
+      features.push(polygonFeature2);
       // 用 LineString 画矩形
-      var rect = new ol.geom.LineString([[112.96, 23.64], [112.97, 23.64], [112.97, 23.66], [112.96, 23.66], [112.96, 23.64]]);
+      var rect = new ol.geom.LineString([
+        [112.96, 23.64],
+        [112.97, 23.64],
+        [112.97, 23.66],
+        [112.96, 23.66],
+        [112.96, 23.64],
+      ]);
       var rectFeature = new ol.Feature({
         geometry: rect,
         data: {
-          type: 'rect'
-        }
+          type: "rect",
+        },
       });
-      features.push(rectFeature)
+      features.push(rectFeature);
       // 用 LineString 画线
-      var line = new ol.geom.LineString([[113.01, 23.64], [113.02, 23.68]]);
+      var line = new ol.geom.LineString([
+        [113.01, 23.64],
+        [113.02, 23.68],
+      ]);
       var lineFeature = new ol.Feature({
         geometry: line,
         data: {
-          type: 'line'
-        }
+          type: "line",
+        },
       });
-      features.push(lineFeature)
+      features.push(lineFeature);
       var vectorSource = new ol.source.Vector();
       vectorSource.addFeatures(features);
       var vectorLayer = new ol.layer.Vector({
-          source: vectorSource,
-          style: feature => {
-            let data = feature.get('data')
-            if (data && data.type) {
-              feature.setStyle(new ol.style.Style({
-                fill: new ol.style.Fill({ color: 'rgba(255, 255, 255, 0.5)' }),
+        source: vectorSource,
+        style: (feature) => {
+          let data = feature.get("data");
+          if (data && data.type) {
+            feature.setStyle(
+              new ol.style.Style({
+                fill: new ol.style.Fill({ color: "rgba(255, 255, 255, 0.5)" }),
                 stroke: new ol.style.Stroke({
-                  color: 'rgba(0, 34, 43, 0.5)',
-                  lineDash: [10,10],
-                  width: 3
+                  color: "rgba(0, 34, 43, 0.5)",
+                  lineDash: [10, 10],
+                  width: 3,
                 }), // 描边
                 text: new ol.style.Text({
-                  font: '16px',
-                  text: '线标题',
-                  fill: new ol.style.Fill({ color: '#222' }),
+                  font: "16px",
+                  text: "线标题",
+                  fill: new ol.style.Fill({ color: "#222" }),
                   offsetX: 0,
-                  offsetY: -20
-                })
-              }))
-            }
+                  offsetY: -20,
+                }),
+              })
+            );
           }
+        },
       });
       this.map.addLayer(vectorLayer);
       // this.map.removeLayer(vectorLayer);
     },
     addDynamicsOverlay() {
-      const html = '<div id="dynamics" class="dynamics_icon"></div>'
-      $('#map1 canvas.ol-unselectable').append(html)
-      console.log(document.getElementById('dynamics'))
+      const html = '<div id="dynamics" class="dynamics_icon"></div>';
+      $("#map1 canvas.ol-unselectable").append(html);
+      console.log(document.getElementById("dynamics"));
       this.dynamicsOverlay = new ol.Overlay({
-        element: document.getElementById('dynamics')
-      })
-      this.map.addOverlay(this.dynamicsOverlay)
-      this.dynamicsOverlay.setPosition([112.94, 23.67])
+        element: document.getElementById("dynamics"),
+      });
+      this.map.addOverlay(this.dynamicsOverlay);
+      this.dynamicsOverlay.setPosition([112.94, 23.67]);
     },
     removeFeature() {
-      const features = this.source.getFeatures()
-      features.forEach(item => {
-        const d = item.get('data')
-        if (d == '1_2') {
-          this.source.removeFeature(item)
+      const features = this.source.getFeatures();
+      features.forEach((item) => {
+        const d = item.get("data");
+        if (d == "1_2") {
+          this.source.removeFeature(item);
         }
-      })
+      });
     },
     // 添加悬浮层
     addOverlay(feature, coordinate) {
-      if (!feature || !feature.get('data') && !feature.get('features')) {
-        if (!this.overlay) return
+      if (!feature || (!feature.get("data") && !feature.get("features"))) {
+        if (!this.overlay) return;
         this.overlay.setPosition();
-        this.overlay = null
-        return
+        this.overlay = null;
+        return;
       }
       this.overlay = new ol.Overlay({
         element: document.getElementById("popup"), //绑定 Overlay 对象和 DOM 对象的
@@ -429,43 +535,45 @@ export default {
         },
       });
       this.map.addOverlay(this.overlay);
-      this.overlayText = ''
-      this.showOverlayButton = false
-      this.featureData = null
-      let featuresArr = feature.get('data') || feature.get('features')
+      this.overlayText = "";
+      this.showOverlayButton = false;
+      this.featureData = null;
+      let featuresArr = feature.get("data") || feature.get("features");
       if (featuresArr.length == 1) {
-        this.showOverlayButton = true
-        this.featureData = featuresArr[0]
+        this.showOverlayButton = true;
+        this.featureData = featuresArr[0];
       }
-      featuresArr.forEach(item => {
-        this.overlayText += ` ${item.get('data').id}`
-      })
+      featuresArr.forEach((item) => {
+        this.overlayText += ` ${item.get("data").id}`;
+      });
       setTimeout(() => {
         this.overlay.setPosition(coordinate); //把 overlay 显示到指定的 x,y坐标
       }, 200); // 加定时器，防止控制台有报错。估计是悬浮层还未加入到地图中
     },
     // 变更单个图层坐标
     updateFeature() {
-      const s = this.featureData.getStyle() // 需要在 feature 的 style 设置样式，否则获取为null
-      s.getText().setText('变了')
-      this.featureData.setStyle(s)
-      let data = this.featureData.get('data')
-      data.gpsX = data.gpsX + 0.0001
-      data.gpsY = data.gpsY + 0.0001
-      this.featureData.set('data', data)
-      this.featureData.setGeometry(new ol.geom.Point([data.gpsX, data.gpsY]))
+      const s = this.featureData.getStyle(); // 需要在 feature 的 style 设置样式，否则获取为null
+      s.getText().setText("变了");
+      this.featureData.setStyle(s);
+      let data = this.featureData.get("data");
+      data.gpsX = data.gpsX + 0.0001;
+      data.gpsY = data.gpsY + 0.0001;
+      this.featureData.set("data", data);
+      this.featureData.setGeometry(new ol.geom.Point([data.gpsX, data.gpsY]));
     },
     // 获取左上角/右上角/右下角/左下角/左上角
     getExtendAry() {
-      let extent = this.map.getView().calculateExtent(this.map.getSize())
-      extent = [].concat(transform3857To4326([extent[0], extent[1]])).concat(transform3857To4326([extent[2], extent[3]]))
-      let extentArr = []
-      extentArr.push([extent[0], extent[1]])
-      extentArr.push([extent[2], extent[1]])
-      extentArr.push([extent[2], extent[3]])
-      extentArr.push([extent[0], extent[3]])
-      extentArr.push([extent[0], extent[1]])
-      return extentArr
+      let extent = this.map.getView().calculateExtent(this.map.getSize());
+      extent = []
+        .concat(transform3857To4326([extent[0], extent[1]]))
+        .concat(transform3857To4326([extent[2], extent[3]]));
+      let extentArr = [];
+      extentArr.push([extent[0], extent[1]]);
+      extentArr.push([extent[2], extent[1]]);
+      extentArr.push([extent[2], extent[3]]);
+      extentArr.push([extent[0], extent[3]]);
+      extentArr.push([extent[0], extent[1]]);
+      return extentArr;
     },
   },
 };
