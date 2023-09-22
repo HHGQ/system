@@ -356,7 +356,7 @@ export default {
     // 可画线、矩形、多边形
     addLineString() {
       let features = [];
-      this.addSector()
+      this.addSector();
       // 用 Polygon 画多边形
       var polygon1 = new ol.geom.Polygon([
         [
@@ -451,27 +451,30 @@ export default {
     // 画扇形
     addSector() {
       // 用 Polygon 画扇形
-      let longlat = [112.92014122009279, 23.669657707214355]
-      let EPSG = this.map.getView().getProjection().getCode()
+      let longlat = [112.92014122009279, 23.669657707214355];
+      let EPSG = this.map.getView().getProjection().getCode();
       var center = EPSG == "EPSG:3857" ? transform4326To3857(longlat) : longlat; // 扇形的中心点
       // var startAngle = Math.PI/4; // 扇形的起始角度（弧度）
       // var endAngle = Math.PI; // 扇形的结束角度（弧度）
-      let directAngle = 90 // 朝向角度(°)
-      let levelAngle = 40 // 水平可视角度(°)
-      var startAngle = (90 - directAngle - levelAngle / 2) * Math.PI / 180; // 扇形的起始角度（弧度）
-      var endAngle = (90 - directAngle + levelAngle / 2) * Math.PI / 180; // 扇形的结束角度（弧度）
+      let directAngle = 90; // 朝向角度(°)
+      let levelAngle = 40; // 水平可视角度(°)
+      var startAngle = ((90 - directAngle - levelAngle / 2) * Math.PI) / 180; // 扇形的起始角度（弧度）
+      var endAngle = ((90 - directAngle + levelAngle / 2) * Math.PI) / 180; // 扇形的结束角度（弧度）
       var radius = 500; // 半径（单位：米）
       // 中心点转换成米,为了配合半径一起计算边界点的坐标数据
-      var centerProj = EPSG == "EPSG:3857" ? center : ol.proj.fromLonLat(center); // 转成3857
+      var centerProj =
+        EPSG == "EPSG:3857" ? center : ol.proj.fromLonLat(center); // 转成3857
       // 计算扇形的边界点
       var coordinates = [center];
       var numPoints = 32; // 边界点的数量
       for (var i = 0; i <= numPoints; i++) {
         var angle = startAngle + (i / numPoints) * (endAngle - startAngle);
         // if (EPSG == "EPSG:3857") {
-          let x = centerProj[0] + radius * Math.cos(angle);
-          let y = centerProj[1] + radius * Math.sin(angle);
-          coordinates.push(EPSG == "EPSG:3857" ? [x, y] : ol.proj.toLonLat([x, y]));
+        let x = centerProj[0] + radius * Math.cos(angle);
+        let y = centerProj[1] + radius * Math.sin(angle);
+        coordinates.push(
+          EPSG == "EPSG:3857" ? [x, y] : ol.proj.toLonLat([x, y])
+        );
         // } else {
         //   let x = centerProj[0] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.cos(angle) / Math.cos(center[1] * Math.PI / 180);
         //   let y = centerProj[1] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.sin(angle);
@@ -485,18 +488,86 @@ export default {
       var sectorSource = new ol.source.Vector();
       sectorSource.addFeature(sectorFeature);
 
+      // 设置渐变色，但这个会随着层级变化而变化
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const gradient = context.createLinearGradient(0, 0, 128, 0);
+      gradient.addColorStop(0, "rgba(73, 139, 236, 1)");
+      gradient.addColorStop(1, "rgba(73, 139, 236, 0.5)");
+      gradient.addColorStop(1 / 6, "rgba(73, 139, 236, 0.7)");
+      gradient.addColorStop(2 / 6, "rgba(73, 139, 236, 0.5)");
+      gradient.addColorStop(3 / 6, "rgba(73, 139, 236, 0.4)");
+      gradient.addColorStop(4 / 6, "rgba(73, 139, 236, 0.3)");
+      gradient.addColorStop(5 / 6, "rgba(73, 139, 236, 0.2)");
+
       // 创建一个矢量图层并将其添加到地图上
       var sectorLayer = new ol.layer.Vector({
         source: sectorSource,
         style: new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'rgba(255, 0, 0, 0.2)' // 设置填充颜色和透明度
-          }),
-          stroke: new ol.style.Stroke({
-            color: 'red', // 设置边界线颜色
-            width: 2 // 设置边界线宽度
-          })
-        })
+          // fill: new ol.style.Fill({
+          //   // color: 'rgba(255, 0, 0, 0.2)' // 设置填充颜色和透明度
+          //   color: gradient // 设置填充颜色和透明度
+          // }),
+          // stroke: new ol.style.Stroke({
+          //   color: 'rgba(73, 139, 236, 1)', // 设置边界线颜色
+          //   width: 0.3 // 设置边界线宽度
+          // })
+          renderer: (coordinatesArr, state) => {
+            let coordLen = coordinatesArr[0].length;
+            let ctx = state.context;
+            let centerIndex = Math.floor(coordLen / 2);
+            // fill
+            let grad = ctx.createLinearGradient(
+              coordinatesArr[0][centerIndex][0],
+              coordinatesArr[0][centerIndex][1],
+              coordinatesArr[0][coordLen - 1][0],
+              coordinatesArr[0][coordLen - 1][1]
+            );
+            grad.addColorStop(0, "rgba(73, 139, 236, 0)");
+            grad.addColorStop(1, "rgba(73, 139, 236, 0.8)");
+            ctx.beginPath();
+            ctx.fillStyle = grad;
+            ctx.moveTo(coordinatesArr[0][0][0], coordinatesArr[0][0][1]);
+            for (let i = 0; i < coordLen; i++) {
+              ctx.lineTo(coordinatesArr[0][i][0], coordinatesArr[0][i][1]);
+            }
+            ctx.fill();
+
+            // storke
+            let gradLine1 = ctx.createLinearGradient(
+              coordinatesArr[0][1][0],
+              coordinatesArr[0][1][1],
+              coordinatesArr[0][0][0],
+              coordinatesArr[0][0][1]
+            );
+            grad.addColorStop(0, "rgba(28, 197, 245, 0)");
+            grad.addColorStop(1, "rgba(28, 197, 245, 1)");
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = gradLine1;
+            ctx.moveTo(coordinatesArr[0][0][0], coordinatesArr[0][0][1]);
+            ctx.lineTo(coordinatesArr[0][1][0], coordinatesArr[0][1][1]);
+            ctx.stroke();
+
+            let gradLine2 = ctx.createLinearGradient(
+              coordinatesArr[0][1][0],
+              coordinatesArr[0][1][1],
+              coordinatesArr[0][0][0],
+              coordinatesArr[0][0][1]
+            );
+            grad.addColorStop(0, "rgba(28, 197, 245, 0)");
+            grad.addColorStop(1, "rgba(28, 197, 245, 1)");
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = gradLine2;
+            ctx.moveTo(coordinatesArr[0][0][0], coordinatesArr[0][0][1]);
+            ctx.lineTo(
+              coordinatesArr[0][coordLen - 2][0],
+              coordinatesArr[0][coordLen - 2][1]
+            );
+            ctx.stroke();
+          },
+        }),
       });
 
       // 将矢量图层添加到地图上
