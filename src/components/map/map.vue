@@ -356,59 +356,7 @@ export default {
     // 可画线、矩形、多边形
     addLineString() {
       let features = [];
-      for(let j = 0;j< 1000;j++) {
-        // 用 Polygon 画扇形
-        let longlat = [112.92014122009279+j*0.005, 23.669657707214355]
-        let EPSG = this.map.getView().getProjection().getCode()
-        var center = EPSG == "EPSG:3857" ? transform4326To3857(longlat) : longlat; // 扇形的中心点
-        // var startAngle = Math.PI/4; // 扇形的起始角度（弧度）
-        // var endAngle = Math.PI; // 扇形的结束角度（弧度）
-        let directAngle = 90 // 朝向角度(°)
-        let levelAngle = 40 // 水平可视角度(°)
-        var startAngle = (90 - directAngle - levelAngle / 2) * Math.PI / 180; // 扇形的起始角度（弧度）
-        var endAngle = (90 - directAngle + levelAngle / 2) * Math.PI / 180; // 扇形的结束角度（弧度）
-        var radius = 500; // 半径（单位：米）
-        // 中心点转换成米,为了配合半径一起计算边界点的坐标数据
-        var centerProj = EPSG == "EPSG:3857" ? center : ol.proj.fromLonLat(center); // 转成3857
-        // 计算扇形的边界点
-        var coordinates = [center];
-        var numPoints = 32; // 边界点的数量
-        for (var i = 0; i <= numPoints; i++) {
-          var angle = startAngle + (i / numPoints) * (endAngle - startAngle);
-          // if (EPSG == "EPSG:3857") {
-            let x = centerProj[0] + radius * Math.cos(angle);
-            let y = centerProj[1] + radius * Math.sin(angle);
-            coordinates.push(EPSG == "EPSG:3857" ? [x, y] : ol.proj.toLonLat([x, y]));
-          // } else {
-          //   let x = centerProj[0] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.cos(angle) / Math.cos(center[1] * Math.PI / 180);
-          //   let y = centerProj[1] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.sin(angle);
-          //   coordinates.push(ol.proj.toLonLat([x, y])); // 转成经纬度
-          // }
-        }
-  
-        var sector = new ol.geom.Polygon([coordinates]);
-        // 创建一个Feature对象并添加扇形
-        var sectorFeature = new ol.Feature(sector);
-        var sectorSource = new ol.source.Vector();
-        sectorSource.addFeature(sectorFeature);
-  
-        // 创建一个矢量图层并将其添加到地图上
-        var sectorLayer = new ol.layer.Vector({
-          source: sectorSource,
-          style: new ol.style.Style({
-            fill: new ol.style.Fill({
-              color: 'rgba(255, 0, 0, 0.2)' // 设置填充颜色和透明度
-            }),
-            stroke: new ol.style.Stroke({
-              color: 'red', // 设置边界线颜色
-              width: 2 // 设置边界线宽度
-            })
-          })
-        });
-  
-        // 将矢量图层添加到地图上
-        this.map.addLayer(sectorLayer);
-      }
+      this.addSector()
       // 用 Polygon 画多边形
       var polygon1 = new ol.geom.Polygon([
         [
@@ -499,6 +447,60 @@ export default {
       });
       this.map.addLayer(vectorLayer);
       // this.map.removeLayer(vectorLayer);
+    },
+    // 画扇形
+    addSector() {
+      // 用 Polygon 画扇形
+      let longlat = [112.92014122009279, 23.669657707214355]
+      let EPSG = this.map.getView().getProjection().getCode()
+      var center = EPSG == "EPSG:3857" ? transform4326To3857(longlat) : longlat; // 扇形的中心点
+      // var startAngle = Math.PI/4; // 扇形的起始角度（弧度）
+      // var endAngle = Math.PI; // 扇形的结束角度（弧度）
+      let directAngle = 90 // 朝向角度(°)
+      let levelAngle = 40 // 水平可视角度(°)
+      var startAngle = (90 - directAngle - levelAngle / 2) * Math.PI / 180; // 扇形的起始角度（弧度）
+      var endAngle = (90 - directAngle + levelAngle / 2) * Math.PI / 180; // 扇形的结束角度（弧度）
+      var radius = 500; // 半径（单位：米）
+      // 中心点转换成米,为了配合半径一起计算边界点的坐标数据
+      var centerProj = EPSG == "EPSG:3857" ? center : ol.proj.fromLonLat(center); // 转成3857
+      // 计算扇形的边界点
+      var coordinates = [center];
+      var numPoints = 32; // 边界点的数量
+      for (var i = 0; i <= numPoints; i++) {
+        var angle = startAngle + (i / numPoints) * (endAngle - startAngle);
+        // if (EPSG == "EPSG:3857") {
+          let x = centerProj[0] + radius * Math.cos(angle);
+          let y = centerProj[1] + radius * Math.sin(angle);
+          coordinates.push(EPSG == "EPSG:3857" ? [x, y] : ol.proj.toLonLat([x, y]));
+        // } else {
+        //   let x = centerProj[0] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.cos(angle) / Math.cos(center[1] * Math.PI / 180);
+        //   let y = centerProj[1] + (radius / ol.proj.METERS_PER_UNIT.m) * Math.sin(angle);
+        //   coordinates.push(ol.proj.toLonLat([x, y])); // 转成经纬度
+        // }
+      }
+
+      var sector = new ol.geom.Polygon([coordinates]);
+      // 创建一个Feature对象并添加扇形
+      var sectorFeature = new ol.Feature(sector);
+      var sectorSource = new ol.source.Vector();
+      sectorSource.addFeature(sectorFeature);
+
+      // 创建一个矢量图层并将其添加到地图上
+      var sectorLayer = new ol.layer.Vector({
+        source: sectorSource,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 0, 0, 0.2)' // 设置填充颜色和透明度
+          }),
+          stroke: new ol.style.Stroke({
+            color: 'red', // 设置边界线颜色
+            width: 2 // 设置边界线宽度
+          })
+        })
+      });
+
+      // 将矢量图层添加到地图上
+      this.map.addLayer(sectorLayer);
     },
     addDynamicsOverlay() {
       const html = '<div id="dynamics" class="dynamics_icon"></div>';
