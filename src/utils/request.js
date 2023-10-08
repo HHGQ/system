@@ -30,6 +30,7 @@ let timeoutId
 // response interceptor
 service.interceptors.response.use(
   response => {
+    const { url, method, data, params, headers } = response.config
     const res = response.data
     const status = response.status
     // const url = response.request.responseURL || response.config.url // 兼容ie
@@ -41,18 +42,40 @@ service.interceptors.response.use(
         401: 'token过期',
         404: '接口不存在'
       }
-      Message({
-        message: errTipArr[status] || 'Error',
-        type: 'error',
-        duration: 5 * 1000
+      clearTimeout(timeoutId) // 防止弹出过多错误弹窗
+      timeoutId = setTimeout(() => {
+        Message({
+          message: errTipArr[status] || 'Error',
+          type: 'error',
+          duration: 5 * 1000
+        })
+      }, 1000)
+      // return Promise.reject(new Error(res.message || 'Error'))
+      let reRequest
+      switch(method) {
+        case 'post':
+          reRequest = () => service.post(url, data, { headers })
+          break
+        case 'get':
+          reRequest = () => service.get(url, { params, headers })
+      }
+      // return Promise，可不执行axios后面的then，等res()后才执行
+      return new Promise((resolve, reject) => {
+        if (status == 401) {
+          handleTokenOutAjax(() => resolve(reRequest()))
+        } else {
+          reject(new Error(res.message || 'Error'))
+        }
       })
-      return Promise.reject(new Error(res.message || 'Error'))
     } else {
-      return response.data ? res : response // head 请求的 data 为空
+      return res ? res : response // head 请求的 data 为空
     }
   },
   error => {
     console.log('err' + error) // for debug
+
+    const { url, method, data, params, headers } = error.response.config
+
     clearTimeout(timeoutId) // 防止弹出过多错误弹窗
     timeoutId = setTimeout(() => {
       Message({
@@ -61,9 +84,30 @@ service.interceptors.response.use(
         duration: 5 * 1000
       })
     }, 1000)
-    return Promise.reject(error)
+    // return Promise.reject(error)
+  
+    let reRequest
+    switch(method) {
+      case 'post':
+        reRequest = () => service.post(url, data, { headers })
+        break
+      case 'get':
+        reRequest = () => service.get(url, { params, headers })
+    }
+    // return Promise，可不执行axios后面的then，等res()后才执行
+    return new Promise((resolve, reject) => {
+      if (error.response.status == 401) {
+        handleTokenOutAjax(() => resolve(reRequest()))
+      } else {
+        reject(error)
+      }
+    })
   }
 )
+
+const handleTokenOutAjax = (resolve) => {
+  Vue.prototype.$EventBus.$emit('needReRequest', resolve)
+}
 
 Vue.prototype.$ajax = service
 export default service

@@ -9,6 +9,9 @@
     <el-button type="success" size="small" @click="fitToArea"
       >最大化展示某区域</el-button
     >
+    <el-button type="success" size="small" @click="reRequest()"
+      >请求重连</el-button
+    >
     <div id="map1"></div>
     <div v-show="this.overlayText" id="popup" class="ol-popup">
       <a id="popup-closer" class="ol-popup-closer">X</a>
@@ -50,13 +53,18 @@ export default {
       showOverlayButton: false,
       featureData: null,
       source: null,
+      requestArr: []
     };
   },
   created() {},
   mounted() {
+    this.$EventBus.$on('needReRequest', (resolve) => {
+      this.requestArr.push(resolve)
+    })
+
     this.initMap();
     // this.addLayer();
-    // this.addApiLayer()
+    this.addApiLayer()
     this.addLineString();
 
     this.addDynamicsOverlay();
@@ -67,6 +75,15 @@ export default {
     });
   },
   methods: {
+    reRequest() {
+      this.requestArr.forEach((resolve, index) => {
+        if (resolve) {
+          resolve()
+          this.requestArr[index] = null
+        }
+      })
+      this.requestArr = []
+    },
     fitToArea() {
       // 让地图最大化完全地显示区域[112.9819047, 23.66093, 113.0019047, 23.90093]
       this.map
