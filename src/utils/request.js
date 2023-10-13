@@ -72,36 +72,38 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
-
-    const { url, method, data, params, headers } = error.response.config
-
-    clearTimeout(timeoutId) // 防止弹出过多错误弹窗
-    timeoutId = setTimeout(() => {
-      Message({
-        message: error.message,
-        type: 'error',
-        duration: 5 * 1000
-      })
-    }, 1000)
-    // return Promise.reject(error)
+    console.log('err', error) // for debug
+    if (error.response) {
+      const { url, method, data, params, headers } = error.response.config
   
-    let reRequest
-    switch(method) {
-      case 'post':
-        reRequest = () => service.post(url, data, { headers })
-        break
-      case 'get':
-        reRequest = () => service.get(url, { params, headers })
-    }
-    // return Promise，可不执行axios后面的then，等res()后才执行
-    return new Promise((resolve, reject) => {
-      if (error.response.status == 401) {
-        handleTokenOutAjax(() => resolve(reRequest()))
-      } else {
-        reject(error)
+      clearTimeout(timeoutId) // 防止弹出过多错误弹窗
+      timeoutId = setTimeout(() => {
+        Message({
+          message: error.message,
+          type: 'error',
+          duration: 5 * 1000
+        })
+      }, 1000)
+    
+      let reRequest
+      switch(method) {
+        case 'post':
+          reRequest = () => service.post(url, data, { headers })
+          break
+        case 'get':
+          reRequest = () => service.get(url, { params, headers })
       }
-    })
+      // return Promise，可不执行axios后面的then，等res()后才执行
+      return new Promise((resolve, reject) => {
+        if (error.response.status == 401) {
+          handleTokenOutAjax(() => resolve(reRequest()))
+        } else {
+          reject(error)
+        }
+      })
+    } else {
+      return Promise.reject(error)
+    }
   }
 )
 
