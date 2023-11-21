@@ -12,6 +12,12 @@
     <el-button type="success" size="small" @click="reRequest()"
       >请求重连</el-button
     >
+    <el-button
+        type="success"
+        size="small"
+        @click="updateFeature2"
+        >变更坐标</el-button
+      >
     <div id="map1"></div>
     <div v-show="this.overlayText" id="popup" class="ol-popup">
       <a id="popup-closer" class="ol-popup-closer">X</a>
@@ -186,7 +192,7 @@ export default {
     },
     addApiLayer() {
       this.source = new ol.source.Vector({
-        loader: (extent, resolution, projection) => {
+        loader: (extent, resolution, projection) => { // this.source.clear() 会触发改方法
           let arr = []
             .concat(transform3857To4326([extent[0], extent[1]]))
             .concat(transform3857To4326([extent[2], extent[3]]));
@@ -223,7 +229,7 @@ export default {
               );
               features[index].setId(String(item.id)); // setId 可以保持唯一性，防止后端返回数据重复，导致点位重复
             });
-            this.source.addFeatures(features);
+            this.source.addFeatures(features); // 若一个个addFeature，会非常慢
           });
         },
         strategy: ol.loadingstrategy.tile(
@@ -640,7 +646,7 @@ export default {
         this.overlay.setPosition(coordinate); //把 overlay 显示到指定的 x,y坐标
       }, 200); // 加定时器，防止控制台有报错。估计是悬浮层还未加入到地图中
     },
-    // 变更单个图层坐标
+    // 变更选中的图标坐标
     updateFeature() {
       const s = this.featureData.getStyle(); // 需要在 feature 的 style 设置样式，否则获取为null
       s.getText().setText("变了");
@@ -650,6 +656,18 @@ export default {
       data.gpsY = data.gpsY + 0.0001;
       this.featureData.set("data", data);
       this.featureData.setGeometry(new ol.geom.Point([data.gpsX, data.gpsY]));
+    },
+    updateFeature2() {
+      const features = this.source.getFeatures()
+      features.forEach(item => {
+        let d = item.get('data')
+        if (d.id == 3) {
+          d.gpsX = d.gpsX + 0.0001;
+          d.gpsY = d.gpsY + 0.0001;
+          item.set("data", d);
+          item.setGeometry(new ol.geom.Point([d.gpsX, d.gpsY]));
+        }
+      })
     },
     // 获取左上角/右上角/右下角/左下角/左上角
     getExtendAry() {

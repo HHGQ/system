@@ -40,7 +40,7 @@ function initLayer() {
             //       matrixIds: matrixIds,
             //   }),
             // tileSize: 256,
-            // maxZoom: 18,
+            // maxZoom: 18, // 设置请求的最大层级，显示最大层级如果比这个大，那在这个基础上进行数字放大
             // minZoom: 8,
             crossOrigin: 'anonymous' // 导出图片是否允许跨域
           }),
