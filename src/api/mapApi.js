@@ -9,7 +9,24 @@ export function getPoint(data) {
   })
 }
 
-// function getUserAccount() {
+
+const params = new URLSearchParams();
+      params.append('param1', 'value1');
+      params.append('param2', 'value2');
+      // axios.post('/foo', params);
+const controller = new AbortController();
+axios.post('http://127.0.0.1:3000/users/ttt', {a:1,b:2}, {
+    signal: controller.signal,
+    params: {a:1},
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+}).then(res => {
+  console.log(res, 'ttt')
+}).catch(err => {
+  console.log(axios.isCancel(err),'yyy') // true
+});
+  // function getUserAccount() {
 //   return axios.get('http://127.0.0.1:3000/users/sss');
 // }
 

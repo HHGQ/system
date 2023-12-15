@@ -14,8 +14,6 @@ import '@/utils/request.js'
 import "./main-config.js";
 import i18n from './i18n/index'
 
-// Vue.prototype.i18n2 = require('gettext.js')()
-
 import './i18n/gettext'
 
 Vue.prototype.$proj4 = window.proj4

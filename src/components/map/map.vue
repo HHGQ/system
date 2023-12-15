@@ -178,6 +178,13 @@ export default {
         // console.log(this.map.getView().getProjection().getMetersPerUnit()) // 像素转换单位为米
         // console.log(this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature).get('features'))
       });
+      this.map.on("click", (e) => {
+        console.log("click111");
+      });
+      document.getElementById("map1").addEventListener("contextmenu", (e) => {
+        e.preventDefault()
+        console.log("这是右键点击")
+      })
       console.log(
         this.map
           .getLayers()

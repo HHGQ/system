@@ -12,9 +12,9 @@
     <p v-html="$t('common.aTag')"></p>
     <p v-t="$tc('common.apple', 4)"></p>
     <p v-t="$tc('common.banana', 3)"></p>
-    <p>{{i18n2.gettext('Welcome')}}</p>
-    <p>{{i18n2.gettext('Welcome1', 'apples', 'bowl')}}</p>
-    <p>{{i18n2.ngettext('There is %1 apple', '%1', 4)}}</p>
+    <p>{{translator.gettext('Welcome')}}</p>
+    <p>{{translator.gettext('Welcome1', 'apples', 'bowl')}}</p>
+    <p>{{translator.ngettext('There is %1 apple', '%1', 4)}}</p>
     <i18n path="common.term" tag="label" for="common.tos">
       <a href="http://www.baidu.com" target="_blank">{{ $t('common.tos') }}</a>
     </i18n>

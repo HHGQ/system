@@ -48,6 +48,7 @@ export default {
         { name: 'rollup', url: 'https://www.rollupjs.com/', logo: 'rollup' },
         { name: 'Three.js', url: 'http://www.webgl3d.cn/', logo: 'threejs' },
         { name: 'zTree', url: 'https://www.jyvtc.edu.cn/dzb/uiFramework/js/zTree-v3.2/api/API_cn.html', logo: 'zTree' },
+        { name: 'markdown', url: 'http://markdown.p2hp.com/basic-syntax/', logo: 'markdown' },
       ]
     }
   },

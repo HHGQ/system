@@ -1,8 +1,9 @@
 
 import Vue from 'vue';
-import i18n2 from 'gettext.js'
-Vue.prototype.i18n2 = i18n2()
-Vue.prototype.i18n2.setMessages('messages', 'en', {
+import gettextFn from 'gettext.js'
+import axios from 'axios'
+Vue.prototype.translator = gettextFn()
+Vue.prototype.translator.setMessages('messages', 'en', {
   "Welcome": "Bienvenue",
   "Welcome1": "There are %1 in the %2",
   "There is %1 apple": [
@@ -12,4 +13,9 @@ Vue.prototype.i18n2.setMessages('messages', 'en', {
     "Il y a %1 pommeses"
   ]
 }, 'nplurals=2; plural=n>1;');
-// console.log(Vue.prototype.i18n2.getLocale())
+// console.log(Vue.prototype.translator.getLocale())
+axios('./static/en.po').then(res => {
+  console.log(res, 'res')
+})
+// console.log(gettextFn())
+// translator.addTranslations('zh-CN', 'messages', require('./lang/en.po'))
