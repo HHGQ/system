@@ -4,6 +4,8 @@ import Vue from 'vue';
 import en from 'view-design/dist/locale/en-US';
 import zh from 'view-design/dist/locale/zh-CN';
 import tw from 'view-design/dist/locale/zh-TW';
+import localZh from '../../public/static/i18n/zh.json';
+import localEn from '../../public/static/i18n/en.json';
 import VueI18n from 'vue-i18n'
 Vue.use(VueI18n);
 
@@ -25,8 +27,8 @@ const i18n = new VueI18n({
     // formatFallbackMessages: true,
     //  两种方式
     messages: {
-        'en-US': { ...require('./lang/en-US').default, ...en },
-        'zh-CN': { ...require('./lang/zh-CN').default, ...zh },
+        'en-US': { ...require('./lang/en-US').default, ...en, ...require('../../public/static/i18n/en.json') },
+        'zh-CN': { ...require('./lang/zh-CN').default, ...zh, ...require('../../public/static/i18n/zh.json') },
         'zh-TW': { ...require('./lang/zh-TW').default, ...tw },
     },
     // messages: {
