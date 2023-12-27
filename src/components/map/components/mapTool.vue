@@ -15,6 +15,12 @@
     <el-button type="success" size="small" @click="addPoint"
       >新增</el-button
     >
+    <el-button type="success" size="small" @click="dragZoom('in')"
+      >拉框放大</el-button
+    >
+    <el-button type="success" size="small" @click="dragZoom('out')"
+      >拉框缩小</el-button
+    >
     <measureTool ref="measureToolRef" :cMap="cMap" />
     <el-dropdown
       trigger="hover"
@@ -58,12 +64,43 @@ export default {
       drawVector: null,
       drawAction: null,
       drawInteraction: null,
+      dragZoomIn: null,
+      dragZoomOut: null,
     }
   },
   mounted() {
     this.addEscListener()
   },
   methods: {
+    dragZoom(type) {
+      if (type == 'in') {
+        // 初始化一个拉框控件
+        if (!this.dragZoomIn) {
+          this.dragZoomIn = new ol.interaction.DragZoom({
+            condition: ol.events.condition.always,
+            // out: true, // true:缩小 false: 放大
+          });
+          this.cMap.addInteraction(this.dragZoomIn);
+        }
+        this.dragZoomIn.setActive(true);
+        this.dragZoomIn.on('boxend', () => {
+          this.dragZoomIn.setActive(false);
+        })
+      } else {
+         // 初始化一个拉框控件
+         if (!this.dragZoomOut) {
+          this.dragZoomOut = new ol.interaction.DragZoom({
+            condition: ol.events.condition.always,
+            out: true, // true:缩小 false: 放大
+          });
+          this.cMap.addInteraction(this.dragZoomOut);
+        }
+        this.dragZoomOut.setActive(true);
+        this.dragZoomOut.on('boxend', () => {
+          this.dragZoomOut.setActive(false);
+        })
+      }
+    },
     // 新增点位
     addPoint() {
       this.drawVector = new ol.layer.Vector({

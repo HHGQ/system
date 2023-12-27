@@ -448,6 +448,15 @@ export default {
         },
       });
       features.push(lineFeature);
+      // 用 Circle 画圆
+      var circle = new ol.geom.Circle([113.01, 23.64], 0.002);
+      var circleFeature = new ol.Feature({
+        geometry: circle,
+        data: {
+          type: 'circle'
+        }
+      });
+      features.push(circleFeature);
       var vectorSource = new ol.source.Vector();
       vectorSource.addFeatures(features);
       var vectorLayer = new ol.layer.Vector({
