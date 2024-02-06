@@ -1,8 +1,11 @@
 {
 	"zh": {
-		"testPlugin1.index.711278-0": "连接你我"
+		"js.translator.325371-0": "这是中文"
 	},
 	"en": {
-		"testPlugin1.index.711278-0": ""
+		"js.translator.325371-0": "this is chinese"
+	},
+	"tw": {
+		"js.translator.325371-0": ""
 	}
 }

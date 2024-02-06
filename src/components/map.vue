@@ -3,6 +3,8 @@
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="一般地图" name="1">
       </el-tab-pane>
+      <el-tab-pane label="7.3.0地图" name="9">
+      </el-tab-pane>
       <el-tab-pane label="栅格地图" name="2">
       </el-tab-pane>
       <el-tab-pane label="超图" name="3">
@@ -20,6 +22,7 @@
     </el-tabs>
     <keep-alive>
       <normalMap v-if="activeName==1" />
+      <newOlMap v-else-if="activeName==9" />
       <vectorMap v-else-if="activeName==2" />
       <superMap v-else-if="activeName==3" />
       <transformMap v-else-if="activeName==4" />
@@ -33,6 +36,7 @@
 
 <script>
 import normalMap from './map/map.vue'
+import newOlMap from './map/7.3.0map.vue'
 import vectorMap from './map/vectorMap.vue'
 import superMap from './map/superMap.vue'
 import transformMap from './map/transformMap.vue'
@@ -44,6 +48,7 @@ import mapbox from './map/mapbox.vue'
 export default {
   components: {
     normalMap,
+    newOlMap,
     vectorMap,
     superMap,
     transformMap,

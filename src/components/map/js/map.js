@@ -1,9 +1,12 @@
-import ol from 'openlayers'
-import { wgs84togcj02, gcj02towgs84 } from './tranform'
+// import ol from 'openlayers'
+import {
+  wgs84togcj02,
+  gcj02towgs84
+} from './tranform'
 
 function initLayer() {
   let layerArr = []
-  switch(GloalConfig.mapType) {
+  switch (GloalConfig.mapType) {
     case 0:
       layerArr.push(new ol.layer.Tile({
         source: new ol.source.OSM()
@@ -12,16 +15,15 @@ function initLayer() {
     case 1:
       layerArr.push(new ol.layer.Tile({
         source: new ol.source.XYZ({
-          url:
-            "http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"
+          url: "http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}",
         })
       }));
       break
     case 2:
       layerArr.push(new ol.layer.Tile({
+        preload: Infinity,
         source: new ol.source.XYZ({
-          url:
-            "http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}",
+          url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}",
           crossOrigin: 'anonymous' // 导出图片是否允许跨域
         })
       }));
@@ -58,11 +60,11 @@ function initLayer() {
       layerArr.push(new ol.layer.Tile({
         source: new ol.source.XYZ({
           crossOrigin: 'anonymous', // 导出图片是否允许跨域
-          tileLoadFunction: function(imageTile, src) {
+          tileLoadFunction: function (imageTile, src) {
             const xhr = new XMLHttpRequest()
             xhr.open('GET', src)
             xhr.setRequestHeader('Authorizatioin', 'tokenxxx')
-            xhr.onload = function() {
+            xhr.onload = function () {
               imageTile.getImage().src = src
             }
             xhr.send()
@@ -93,7 +95,7 @@ function transform3857To4326(lonlat) {
  */
 function transform4326To3857(lonlat) {
   // if (GloalConfig.EPSG == '3857') {
-    return ol.proj.transform(lonlat, "EPSG:4326", "EPSG:3857")
+  return ol.proj.transform(lonlat, "EPSG:4326", "EPSG:3857")
   // }
   // return lonlat
 }
@@ -105,7 +107,7 @@ function transform4326To3857(lonlat) {
  */
 function transformSaveToShow(lonlat) {
   if (GloalConfig.mapNeedTransformGPS) {
-    lonlat = wgs84togcj02(lonlat[0], lonlat[1]) 
+    lonlat = wgs84togcj02(lonlat[0], lonlat[1])
   }
   return transform4326To3857(lonlat)
 }
@@ -118,7 +120,7 @@ function transformSaveToShow(lonlat) {
 function transformShowToSave(lonlat) {
   lonlat = transform3857To4326(lonlat)
   if (GloalConfig.mapNeedTransformGPS) {
-    lonlat = gcj02towgs84(lonlat[0], lonlat[1]) 
+    lonlat = gcj02towgs84(lonlat[0], lonlat[1])
   }
   return lonlat
 }

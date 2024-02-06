@@ -6,8 +6,18 @@ import zh from 'view-design/dist/locale/zh-CN';
 import tw from 'view-design/dist/locale/zh-TW';
 import localZh from '../../public/static/i18n/zh.json';
 import localEn from '../../public/static/i18n/en.json';
+import allLang from './temp/du.json'
 import VueI18n from 'vue-i18n'
 Vue.use(VueI18n);
+
+for (const i in allLang.zh) {
+  if (!(allLang as any).en[i]) {
+    (allLang as any).en[i] = (allLang as any).zh[i]
+  }
+  if (!(allLang as any).tw[i]) {
+    (allLang as any).tw[i] = (allLang as any).zh[i]
+  }
+}
 
 // 判断获取后的值是什么语言
 const lang_cur = localStorage.getItem('language');
@@ -27,9 +37,11 @@ const i18n = new VueI18n({
     // formatFallbackMessages: true,
     //  两种方式
     messages: {
-        'en-US': { ...require('./lang/en-US').default, ...en, ...require('../../public/static/i18n/en.json') },
-        'zh-CN': { ...require('./lang/zh-CN').default, ...zh, ...require('../../public/static/i18n/zh.json') },
-        'zh-TW': { ...require('./lang/zh-TW').default, ...tw },
+        // 'en-US': { ...require('./lang/en-US').default, ...en, ...require('../../public/static/i18n/en.json') },
+        // 'zh-CN': { ...require('./lang/zh-CN').default, ...zh, ...require('../../public/static/i18n/zh.json') },
+        'en-US': { ...require('./lang/en-US').default, ...en, ...allLang.en },
+        'zh-CN': { ...require('./lang/zh-CN').default, ...zh, ...allLang.zh },
+        'zh-TW': { ...require('./lang/zh-TW').default, ...tw, ...allLang.tw },
     },
     // messages: {
     //     'en': LangEn,

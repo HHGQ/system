@@ -7,7 +7,8 @@
 	"defaultLang": "zh",
 	"tempLangs": [
 		"zh",
-		"en"
+		"en",
+    "tw"
 	],
 	"langPaths": "public/static/i18n/**",
 	"transSourcePaths": "src/i18n/source/**",

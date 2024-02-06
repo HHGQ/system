@@ -1,4 +1,5 @@
 {
+	"testPlugin1.index.711278-0": "连接你我",
 	"components.elementUI.836502-0": "导航一",
 	"components.elementUI.836502-1": "分组一",
 	"components.elementUI.836502-2": "选项1",
@@ -264,5 +265,8 @@
 	"elementUI.clientImportAndExport.976437-12": "李四",
 	"elementUI.clientImportAndExport.976437-13": "女",
 	"elementUI.clientImportAndExport.976437-14": "导出.xlsx",
-	"testPlugin1.index.711278-0": "连接你我"
+	"js.translator.904976-0": "这是中文",
+	"js": {
+		"translator": {}
+	}
 }
