@@ -23,6 +23,7 @@ export default {
         { name: 'webpack', url: 'https://webpack.docschina.org/', logo: 'webpack' },
         // { name: 'nodejs', url: 'https://nodejs.org/en/' },
         { name: 'nodejs 中文文档', url: 'https://www.nodeapp.cn/', logo: 'nodejs' },
+        { name: 'vscode插件下载地址', url: 'https://marketplace.visualstudio.com/search?target=VSCode&category=All%20categories&sortBy=Relevance', logo: 'vscode' },
         // { name: 'Kubernetes', url: 'https://kubernetes.io/' },
         { name: 'Kubernetes 中文文档', url: 'http://docs.kubernetes.org.cn/', logo: 'Kubernetes' },
         { name: 'Element UI', url: 'https://element.eleme.cn/#/zh-CN', logo: 'element_ui' },
