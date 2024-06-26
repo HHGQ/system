@@ -1,5 +1,6 @@
 <template>
   <div>
+    <img src="http://192.168.73.134:3000/chunkImg" alt="">
     <video id="videoPlayer" controls></video>
     <!-- <video src="http://localhost:8080/static/这是视频.mp4" id="videoPlayer" controls></video> -->
     <div @click="copy">复制一下</div>

@@ -9,6 +9,7 @@
       </el-option>
     </el-select>
     <p>{{ $t("common.hello") }}</p>
+    <p>{{ $t("common{0}hello", 111) }}</p>
     <p v-html="$t('common.aTag')"></p>
     <p v-t="$tc('common.apple', 4)"></p>
     <p v-t="$tc('common.banana', 3)"></p>

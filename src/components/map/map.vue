@@ -59,7 +59,7 @@ export default {
       showOverlayButton: false,
       featureData: null,
       source: null,
-      requestArr: []
+      requestArr: [],
     };
   },
   created() {},
@@ -109,7 +109,6 @@ export default {
     },
     inMapView() {
       let extent = this.map.getView().calculateExtent(this.map.getSize());
-      console.log(extent);
       extent = transform3857To4326(extent);
       // let flag = ol.extent.containsExtent(extent, this.judgeFeature.getGeometry().getExtent())
       let flag = ol.extent.containsExtent(
@@ -142,6 +141,7 @@ export default {
           center: [112.9819047, 23.66093],
           projection: "EPSG:4326",
           // projection: 'EPSG:4490'
+          minZoom: 0
         }),
         controls: ol.control
           .defaults({
@@ -170,16 +170,23 @@ export default {
       // 只有单击才触发
       this.map.on("singleclick", (e) => {
         console.log("click");
+        console.log(this.source.getFeatures(), 111)
         const feature = this.map.forEachFeatureAtPixel(
           e.pixel,
           (feature, layer) => feature
         );
+        console.log(feature, 'feature')
         this.addOverlay(feature, e.coordinate);
         // console.log(this.map.getView().getProjection().getMetersPerUnit()) // 像素转换单位为米
         // console.log(this.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => feature).get('features'))
       });
       this.map.on("click", (e) => {
         console.log("click111");
+      });
+      this.map.getView().on("change:resolution", (e) => {
+        // console.log(this.map.getView().getZoom());
+        this.requestSource.clear()
+        this.source.clear();
       });
       document.getElementById("map1").addEventListener("contextmenu", (e) => {
         e.preventDefault()
@@ -198,8 +205,19 @@ export default {
       );
     },
     addApiLayer() {
+      this.requestSource = new ol.source.Vector({
+        wrapX: false,
+        wrapY: false
+      })
+      this.requestLayer = new ol.layer.Vector({
+        source: this.requestSource
+      })
+      this.map.addLayer(this.requestLayer)
       this.source = new ol.source.Vector({
-        loader: (extent, resolution, projection) => { // this.source.clear() 会触发改方法
+        wrapX: false,
+        loader: (extent, resolution, projection) => { // 放大缩小移动地图都会触发,this.source.clear()也会
+          // extent 是左下角和右上角坐标
+          // 通过判断四个角坐标在合法范围，则画栅格
           let arr = []
             .concat(transform3857To4326([extent[0], extent[1]]))
             .concat(transform3857To4326([extent[2], extent[3]]));
@@ -241,9 +259,10 @@ export default {
         },
         strategy: ol.loadingstrategy.tile(
           ol.tilegrid.createXYZ({
-            tileSize: 512,
+            tileSize: 512, // 根据此设置来决定请求的extent范围，单位px，默认是[256, 256] 如果不是2的倍数，则近似取2的倍数
           })
         ),
+        // strategy: ol.loadingstrategy.bbox
       });
       let layer = new ol.layer.Vector({
         source: this.source,
@@ -323,9 +342,9 @@ export default {
       var layer;
       if (needCluser) {
         // 聚合
-        var cluster = new ol.source.Cluster({
-          source: source,
-          distance: 40,
+        const cluster = new ol.source.Cluster({
+          source: source, // 聚合源数据
+          distance: 16 // 图标的中心距离，单位px，当小于此值时，聚合为一个图标
         });
         // 创建图层(聚合)
         layer = new ol.layer.Vector({
@@ -336,7 +355,7 @@ export default {
               return new ol.style.Style({
                 // 这个优先级比feature的style高
                 image: new ol.style.Icon({
-                  src: require("@/common/img/location.png"),
+                  src: require("@/common/img/GunMachineIcon.png"),
                 }),
                 text: new ol.style.Text({
                   text: feature.get("features")[0].get("data").id,

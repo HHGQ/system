@@ -1,4 +1,4 @@
-// import ol from 'openlayers'
+import ol from 'openlayers'
 import {
   wgs84togcj02,
   gcj02towgs84
@@ -24,8 +24,9 @@ function initLayer() {
         preload: Infinity,
         source: new ol.source.XYZ({
           url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}",
-          crossOrigin: 'anonymous' // 导出图片是否允许跨域
-        })
+          crossOrigin: 'anonymous', // 导出图片是否允许跨域
+          wrapX: false
+        }),
       }));
       break
     case 3:
