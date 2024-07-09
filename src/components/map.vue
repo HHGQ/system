@@ -19,6 +19,8 @@
       </el-tab-pane>
       <el-tab-pane label="mapbox" name="8">
       </el-tab-pane>
+      <el-tab-pane label="百度地图" name="10">
+      </el-tab-pane>
     </el-tabs>
     <keep-alive>
       <normalMap v-if="activeName==1" />
@@ -30,6 +32,7 @@
       <staticMap v-else-if="activeName==6" />
       <threeDMap v-else-if="activeName==7" />
       <mapbox v-else-if="activeName==8" />
+      <baiduMap v-else-if="activeName==10" />
     </keep-alive>
   </div>
 </template>
@@ -45,6 +48,7 @@ import staticMap from './map/staticMap.vue'
 import DMap from './map/3DMap.vue'
 import threeDMap from './map/3DMap.vue'
 import mapbox from './map/mapbox.vue'
+import baiduMap from './map/baiduMap.vue'
 export default {
   components: {
     normalMap,
@@ -55,7 +59,8 @@ export default {
     debugMap,
     staticMap,
     threeDMap,
-    mapbox
+    mapbox,
+    baiduMap
   },
   data() {
     return {

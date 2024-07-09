@@ -18,7 +18,7 @@
         @click="updateFeature2"
         >变更坐标</el-button
       >
-    <div id="map1"></div>
+    <div id="map1" tabindex="1"></div>
     <div v-show="this.overlayText" id="popup" class="ol-popup">
       <a id="popup-closer" class="ol-popup-closer">X</a>
       <div id="popup-content" class="popup-content">{{ overlayText }}</div>
@@ -137,6 +137,8 @@ export default {
         view: new ol.View({
           zoom: 14,
           // center: [12577088.100058164, 2712145.049551703], // 3857 的中心点
+          extent: [112, 23, 124, 26],
+          // center: ol.proj.transform([112.9819047, 23.66093], 'EPSG:4326', 'EPSG:3857'),
           // projection: "EPSG:3857",
           center: [112.9819047, 23.66093],
           projection: "EPSG:4326",
@@ -640,6 +642,7 @@ export default {
       });
       this.map.addOverlay(this.dynamicsOverlay);
       this.dynamicsOverlay.setPosition([112.94, 23.67]);
+      // this.dynamicsOverlay.setPosition(ol.proj.transform([112.94, 23.67], 'EPSG:4326', 'EPSG:3857'))
     },
     removeFeature() {
       const features = this.source.getFeatures();

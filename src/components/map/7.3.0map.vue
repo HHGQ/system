@@ -18,7 +18,14 @@
         @click="updateFeature2"
         >变更坐标</el-button
       >
-    <div id="map1"></div>
+      <a
+        id="download"
+        type="success"
+        size="small"
+        download="features.json"
+        >下载拖拽导入的GeoJSON</a
+      >
+    <div id="newmap" tabindex="1"></div>
     <div v-show="this.overlayText" id="popup" class="ol-popup">
       <a id="popup-closer" class="ol-popup-closer">X</a>
       <div id="popup-content" class="popup-content">{{ overlayText }}</div>
@@ -35,7 +42,7 @@
 
 <script>
 import ol from "openlayers";
-// 4.6.4
+// 4.6.5
 // import Map from 'ol4.6.5/map';
 // import View from 'ol4.6.5/view';
 // import VectorSource from 'ol4.6.5/source/vector.js';
@@ -52,6 +59,8 @@ import ol from "openlayers";
 import Map from "ol/Map";
 import View from 'ol/View';
 import VectorSource from 'ol/source/Vector.js';
+import VectorLayer from 'ol/layer/Vector.js';
+import Overlay from 'ol/Overlay.js';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import TileDebug from 'ol/source/TileDebug';
@@ -71,7 +80,11 @@ import {
 } from "./js/mapTool";
 import { getPoint } from "@/api/mapApi";
 import mapTool from "./components/mapTool.vue";
-
+import LayerGroup from 'ol/layer/Group';
+import DragAndDrop from 'ol/interaction/DragAndDrop';
+import GeoJSON from 'ol/format/GeoJSON.js'; 
+import Modify from 'ol/interaction/Modify';
+import { KeyboardZoom } from 'ol/interaction'; 
 export default {
   components: {
     mapTool,
@@ -94,11 +107,11 @@ export default {
     })
 
     this.initMap();
-    this.addLayer();
+    // this.addLayer();
     // this.addApiLayer()
     // this.addLineString();
 
-    // this.addDynamicsOverlay();
+    this.addDynamicsOverlay();
     // document.getElementById("popup-closer").addEventListener("click", (e) => {
     //   this.overlay.setPosition(undefined);
     //   document.getElementById("popup-closer").blur();
@@ -158,7 +171,7 @@ export default {
       // }
       // var origin = ol.extent.getTopLeft(projectionExtent);
       this.map = new Map({
-        target: 'map1',
+        target: 'newmap',
         layers: [
           new TileLayer({
             source: new XYZ({
@@ -166,32 +179,41 @@ export default {
               crossOrigin: 'anonymous', // 导出图片是否允许跨域
               maxTilesLoading: 80,
               cacheSize: 100,
+              // tileUrlFunction: function (tileCoord) {
+              //   console.log(tileCoord, 'tile')
+              //   return `http://wprd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x=${tileCoord[1]}&y=${tileCoord[2]}&z=${tileCoord[0]}`
+              // }
             }),
           }),
         ],
         view: new View({
           zoom: 14,
+          // extent: [112, 23, 124, 26],
           center: [112.9819047, 23.66093],
+          // center: ol.proj.transform([112.9819047, 23.66093], 'EPSG:4326', 'EPSG:3857')
           projection: "EPSG:4326",
+          constrainRotation: 8,
+          constrainResolution: true
+          // multiWorld: true
         }),
-        // controls: controlDefaults({
-        //     zoomOptions: {
-        //       zoomInTipLabel: "放大",
-        //       zoomOutTipLabel: "缩小",
-        //     },
-        //   })
-        //   .extend([
-        //     new MousePosition({
-        //       coordinateFormat: olCoordinate.createStringXY(6),
-        //       // projection: "EPSG:3857",
-        //       projection: "EPSG:4326",
-        //       // projection: 'EPSG:4490'
-        //     }),
-        //     new FullScreen(),
-        //   ]),
-        // interactions: interactionDefaults({
-        //   doubleClickZoom: false, // 取消双击放大
-        // }),
+        controls: controlDefaults({
+            zoomOptions: {
+              zoomInTipLabel: "放大",
+              zoomOutTipLabel: "缩小",
+            },
+          })
+          .extend([
+            new MousePosition({
+              coordinateFormat: olCoordinate.createStringXY(6),
+              // projection: "EPSG:3857",
+              projection: "EPSG:4326",
+              // projection: 'EPSG:4490'
+            }),
+            new FullScreen(),
+          ]),
+        interactions: interactionDefaults({
+          doubleClickZoom: false, // 取消双击放大
+        }),
       });
       // 双击也会触发add
       // this.map.on('click', (e) => {
@@ -211,7 +233,7 @@ export default {
       this.map.on("click", (e) => {
         console.log("click111");
       });
-      document.getElementById("map1").addEventListener("contextmenu", (e) => {
+      document.getElementById("newmap").addEventListener("contextmenu", (e) => {
         e.preventDefault()
         console.log("这是右键点击")
       })
@@ -226,6 +248,36 @@ export default {
       console.log(
         this.map.getLayers().getArray()[0].getSource().getTileGrid().getOrigin()
       );
+
+      this.downloadGeoJSON()
+    },
+    // 可拖拽上传geojson文件，及下载geojson文件
+    downloadGeoJSON() {
+      this.source1 = new VectorSource();
+      const layer1 = new VectorLayer({
+        source: this.source1,
+      });
+      this.map.addLayer(layer1);
+      this.map.addInteraction(
+        new DragAndDrop({
+          source: this.source1,
+          formatConstructors: [GeoJSON],
+        })
+      );
+      this.map.addInteraction(
+        new Modify({
+          source: this.source1,
+        })
+      );
+      const download = document.getElementById('download');
+      const format = new GeoJSON({featureProjection: 'EPSG:4326'});
+      this.source1.on('change', () => {
+        console.log(111)
+        const features = this.source1.getFeatures();
+        const json = format.writeFeatures(features);
+        download.href =
+          'data:application/json;charset=utf-8,' + encodeURIComponent(json);
+      });
     },
     addApiLayer() {
       this.source = new ol.source.Vector({
@@ -644,9 +696,9 @@ export default {
     },
     addDynamicsOverlay() {
       const html = '<div id="dynamics" class="dynamics_icon"></div>';
-      $("#map1 canvas.ol-unselectable").append(html);
+      $("#newmap .ol-layers").append(html);
       console.log(document.getElementById("dynamics"));
-      this.dynamicsOverlay = new ol.Overlay({
+      this.dynamicsOverlay = new Overlay({
         element: document.getElementById("dynamics"),
       });
       this.map.addOverlay(this.dynamicsOverlay);
@@ -736,7 +788,7 @@ export default {
 <style lang="less" scoped>
 .map_containter {
   height: 100%;
-  #map1 {
+  #newmap {
     width: 100%;
     height: 89%;
   }

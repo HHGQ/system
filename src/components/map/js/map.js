@@ -25,7 +25,12 @@ function initLayer() {
         source: new ol.source.XYZ({
           url: "http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}",
           crossOrigin: 'anonymous', // 导出图片是否允许跨域
-          wrapX: false
+          wrapX: false,
+          // projection: "EPSG:4326",
+          // tileUrlFunction: function (tileCoord) {
+          //   console.log(tileCoord, 'tile')
+          //   return `http://wprd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x=${tileCoord[1]}&y=${tileCoord[2]}&z=${tileCoord[0]}`
+          // }
         }),
       }));
       break

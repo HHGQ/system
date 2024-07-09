@@ -52,7 +52,8 @@ export default {
         { name: 'Three.js', url: 'http://www.webgl3d.cn/', logo: 'threejs' },
         { name: 'zTree', url: 'https://www.jyvtc.edu.cn/dzb/uiFramework/js/zTree-v3.2/api/API_cn.html', logo: 'zTree' },
         { name: 'markdown', url: 'http://markdown.p2hp.com/basic-syntax/', logo: 'markdown' },
-        // http://datav.aliyun.com/portal/school/atlas/area_selector 阿里云全国区域数据
+        { name: '阿里云全国区域数据', url: 'http://datav.aliyun.com/portal/school/atlas/area_selector/', logo: 'datav' },
+        { name: 'EPSG官网', url: 'https://epsg.io/', logo: 'epsg' },
       ]
     }
   },
@@ -69,7 +70,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   overflow: auto;
-  height: 92.5%;
+  height: calc(100% - 15.5%);
   /deep/ .el-card {
     height: 201px;
     width: 200px;
