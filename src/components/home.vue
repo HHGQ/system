@@ -39,7 +39,7 @@ export default {
         { name: 'electronjs', url: 'https://www.electronjs.org/zh/', logo: 'electronjs' },
         { name: '菜鸟教程', url: 'https://www.runoob.com/', logo: 'cainiao' },
         { name: 'echarts', url: 'https://echarts.apache.org/zh/index.html', logo: 'echarts' },
-        { name: 'vite', url: 'https://echarts.apache.org/zh/index.html', logo: 'vite' },
+        { name: 'vite', url: 'https://cn.vitejs.dev/', logo: 'vite' },
         { name: 'w3school中文网', url: 'https://www.w3school.com.cn/', logo: 'w3c' },
         { name: 'w3schools官网', url: 'https://www.w3schools.com/', logo: 'w3cschools' },
         { name: 'jQuery官网', url: 'https://jquery.com/', logo: 'jquery' },
