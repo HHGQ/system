@@ -5,18 +5,50 @@
     <!-- <video src="http://localhost:8080/static/这是视频.mp4" id="videoPlayer" controls></video> -->
     <div @click="copy">复制一下</div>
     <div @click="playVideo">播放一下</div>
+    <div v-html="htmlText"></div>
   </div>
 </template>
 
 <script>
+// 将unicode编码转字符串
+const unicodeToStr = function (unicode) {
+  let result = [];
+  let strArr = unicode.split("\\u");
+  for (let i = 0, len = strArr.length; i < len; i++) {
+    if (strArr[i]) {
+      result.push(String.fromCharCode(parseInt(strArr[i], 16)));
+    }
+  }
+  return result.join("");
+};
+
+// 将字符串转unicode编码
+const strToUnicode = function (str) {
+  let unid = "\\u";
+  for (let i = 0, len = str.length; i < len; i++) {
+    if (i < len - 1) {
+      unid += `${str.charCodeAt(i).toString(16)}\\u`;
+    } else if (i === len - 1) {
+      unid += str.charCodeAt(i).toString(16);
+    }
+  }
+  return unid;
+};
 export default {
   data() {
-    return {};
+    return {
+      htmlText: '',
+    };
   },
   mounted() {
     console.log(this.$route);
+    this.htmlText = this.highLight('这是一段用JS显示高亮的文字', '高亮的')
+    console.log(this.highLight('这是一段用JS显示高亮的文字', '显示高亮'), 'xxx')
   },
   methods: {
+    highLight(str, key) {
+      return unicodeToStr(strToUnicode(str).replace(`${strToUnicode(key)}`, val => strToUnicode(`<strong style="color: #0082e5;">${unicodeToStr(val)}</strong>`)));
+    },
     copy() {
       var text = "被复制的内容，啦啦啦~";
       if (navigator.clipboard) {
