@@ -8,7 +8,7 @@
       multiple>
       <el-button size="small" type="primary">点击上传</el-button>
     </el-upload>
-    <canvas id="canvas-container" width="800px" height="500px"></canvas>
+    <canvas id="canvas-container1" width="800px" height="500px"></canvas>
   </div>
 </template>
 
@@ -28,7 +28,7 @@
         reader.readAsArrayBuffer(file);
         reader.onload = function(){
           var binary = this.result;
-          var canvas = document.getElementById("canvas-container")
+          var canvas = document.getElementById("canvas-container1")
           const gl = canvas.getContext('webgl')
           // 2.初始化着色器程序 initProgram
           // 创建着色器
