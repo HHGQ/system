@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       learnList: [
+        { name: 'html+css+js', url: 'https://developer.mozilla.org/zh-CN/docs/Web', logo: 'mdn' },
         { name: 'vue2', url: 'https://v2.cn.vuejs.org/', logo: 'vue' },
         { name: 'vue3', url: 'https://v3.cn.vuejs.org/', logo: 'vue' },
         { name: 'vuex', url: 'https://vuex.vuejs.org/zh/', logo: 'vue' },
@@ -20,6 +21,7 @@ export default {
         { name: 'less 中文网', url: 'https://less.bootcss.com/', logo: 'less' },
         { name: 'axios 中文网', url: 'http://axios-js.com/', logo: 'axios' },
         { name: 'typeScript 中文网', url: 'https://www.tslang.cn/index.html', logo: 'ts' },
+        { name: 'typeScript 官网', url: 'https://www.typescriptlang.org/', logo: 'ts' },
         { name: 'webpack', url: 'https://webpack.docschina.org/', logo: 'webpack' },
         { name: 'nodejs官网', url: 'https://nodejs.org/en/', logo: 'nodejs'  },
         { name: 'nodejs 中文文档', url: 'https://www.nodeapp.cn/', logo: 'nodejs' },
@@ -38,12 +40,9 @@ export default {
         { name: '菜鸟教程', url: 'https://www.runoob.com/', logo: 'cainiao' },
         { name: 'echarts', url: 'https://echarts.apache.org/zh/index.html', logo: 'echarts' },
         { name: 'vite', url: 'https://echarts.apache.org/zh/index.html', logo: 'vite' },
-        { name: 'Web开发技术', url: 'https://developer.mozilla.org/zh-CN/docs/Web', logo: 'mdn' },
-        { name: 'w3school', url: 'https://www.w3school.com.cn/', logo: 'w3c' },
-        { name: 'html5', url: 'https://www.w3school.com.cn/html/html5_intro.asp', logo: 'w3c' },
-        { name: 'css3', url: 'https://www.w3school.com.cn/css/index.asp', logo: 'w3c' },
-        { name: 'JavaScript', url: 'https://www.w3school.com.cn/js/index.asp', logo: 'w3c' },
-        { name: 'jQuery', url: 'https://www.w3school.com.cn/jquery/index.asp', logo: 'w3c' },
+        { name: 'w3school中文网', url: 'https://www.w3school.com.cn/', logo: 'w3c' },
+        { name: 'w3schools官网', url: 'https://www.w3schools.com/', logo: 'w3cschools' },
+        { name: 'jQuery官网', url: 'https://jquery.com/', logo: 'jquery' },
         { name: 'React', url: 'https://react.docschina.org/', logo: 'react' },
         { name: 'Next.js', url: 'https://www.nextjs.cn/', logo: 'nextjs' },
         { name: '微信小程序', url: 'https://developers.weixin.qq.com/miniprogram/dev/framework/', logo: 'wxxcx' },

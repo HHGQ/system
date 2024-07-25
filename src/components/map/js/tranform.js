@@ -1,3 +1,4 @@
+import gcoord from 'gcoord';
 //地标 转 国测 常量
 const PI = 3.1415926535897932384626;
 const a = 6378245.0; //卫星椭球坐标投影到平面地图坐标系的投影因子
@@ -66,22 +67,23 @@ function transformlat(lng, lat) {
  * @returns {array}
  */
 const wgs84togcj02 = (lng, lat) => {
-  if (outOfChina(lng, lat)) {
-    return [lng, lat];
-  } else {
-    let dlat = transformlat(lng - 105.0, lat - 35.0);
-    let dlng = transformlng(lng - 105.0, lat - 35.0);
-    let radlat = (lat / 180.0) * PI;
-    let magic = Math.sin(radlat);
-    magic = 1 - ee * magic * magic;
-    const sqrtmagic = Math.sqrt(magic);
-    dlat = (dlat * 180.0) / (((a * (1 - ee)) / (magic * sqrtmagic)) * PI);
-    dlng = (dlng * 180.0) / ((a / sqrtmagic) * Math.cos(radlat) * PI);
-    const mglat = lat + dlat;
-    const mglng = lng + dlng;
+  gcoord.transform([lng, lat], gcoord.WGS84, gcoord.GCJ02)
+  // if (outOfChina(lng, lat)) {
+  //   return [lng, lat];
+  // } else {
+  //   let dlat = transformlat(lng - 105.0, lat - 35.0);
+  //   let dlng = transformlng(lng - 105.0, lat - 35.0);
+  //   let radlat = (lat / 180.0) * PI;
+  //   let magic = Math.sin(radlat);
+  //   magic = 1 - ee * magic * magic;
+  //   const sqrtmagic = Math.sqrt(magic);
+  //   dlat = (dlat * 180.0) / (((a * (1 - ee)) / (magic * sqrtmagic)) * PI);
+  //   dlng = (dlng * 180.0) / ((a / sqrtmagic) * Math.cos(radlat) * PI);
+  //   const mglat = lat + dlat;
+  //   const mglng = lng + dlng;
 
-    return [mglng, mglat];
-  }
+  //   return [mglng, mglat];
+  // }
 };
 
 /**
@@ -93,22 +95,23 @@ const wgs84togcj02 = (lng, lat) => {
  * @returns {array}
  */
 const gcj02towgs84 = (lng, lat) => {
-  if (outOfChina(lng, lat)) {
-    return [lng, lat];
-  } else {
-    let dlat = transformlat(lng - 105.0, lat - 35.0);
-    let dlng = transformlng(lng - 105.0, lat - 35.0);
-    let radlat = (lat / 180.0) * PI;
-    let magic = Math.sin(radlat);
-    magic = 1 - ee * magic * magic;
-    const sqrtmagic = Math.sqrt(magic);
-    dlat = (dlat * 180.0) / (((a * (1 - ee)) / (magic * sqrtmagic)) * PI);
-    dlng = (dlng * 180.0) / ((a / sqrtmagic) * Math.cos(radlat) * PI);
-    return [lng - dlng, lat - dlat];
-    // const mglat = lat + dlat;
-    // const mglng = lng + dlng;
-    // return [lng * 2 - mglng, lat * 2 - mglat];
-  }
+  gcoord.transform([lng, lat], gcoord.GCJ02, gcoord.WGS84)
+  // if (outOfChina(lng, lat)) {
+  //   return [lng, lat];
+  // } else {
+  //   let dlat = transformlat(lng - 105.0, lat - 35.0);
+  //   let dlng = transformlng(lng - 105.0, lat - 35.0);
+  //   let radlat = (lat / 180.0) * PI;
+  //   let magic = Math.sin(radlat);
+  //   magic = 1 - ee * magic * magic;
+  //   const sqrtmagic = Math.sqrt(magic);
+  //   dlat = (dlat * 180.0) / (((a * (1 - ee)) / (magic * sqrtmagic)) * PI);
+  //   dlng = (dlng * 180.0) / ((a / sqrtmagic) * Math.cos(radlat) * PI);
+  //   return [lng - dlng, lat - dlat];
+  //   // const mglat = lat + dlat;
+  //   // const mglng = lng + dlng;
+  //   // return [lng * 2 - mglng, lat * 2 - mglat];
+  // }
 };
 
 export { wgs84togcj02, gcj02towgs84 };
